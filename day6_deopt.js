@@ -1,0 +1,128 @@
+// AoC2024. Day 6. Deoptimized version
+
+let INPUT = await fetch('https://adventofcode.com/2024/day/6/input')
+    .then(response => response.text())
+    .catch(err => console.error(err));
+
+/*
+INPUT = `....#.....
+.........#
+..........
+..#.......
+.......#..
+..........
+.#..^.....
+........#.
+#.........
+......#...`;
+*/
+
+
+const INITIAL_MAP = INPUT.split('\n').map(v => v.split(''));
+const MAZE_WIDTH = INITIAL_MAP.length;
+const MAZE_HEIGHT = INITIAL_MAP[0]?.length;
+const SHIFT = parseInt(Math.log(MAZE_WIDTH)/Math.log(2)) + 1;
+
+let INIT_X, INIT_Y, INIT_DIR;
+let Obstacles = new Set();
+
+const packXY = (x, y) => x * MAZE_WIDTH + y;
+// const unpackXY = coords => [parseInt(coords / MAZE_WIDTH), coords % MAZE_WIDTH];
+
+// Bitwise shift provide no benefits here:
+// const packXY = (x, y) => (x << SHIFT) + y;
+// const unpackXY = coords => [coords >> SHIFT, coords % (1 << SHIFT)];
+
+// Save initial state
+for (let i = 0; i < MAZE_WIDTH; i++)
+    for (let j = 0; j < MAZE_HEIGHT; j++) {
+        if (INITIAL_MAP[i][j] === '^') [INIT_X, INIT_Y, INIT_DIR] = [i, j, INITIAL_MAP[i][j]];
+        if (INITIAL_MAP[i][j] === '#') Obstacles.add( packXY(i, j) );
+    }
+
+const redirect = {
+    '^': '>',
+    '>': 'v',
+    'v': '<',
+    '<': '^',
+};
+
+/**
+ * @param {{x: Number, y: Number, dir: String}} from
+ * @param {Set} obstacles 
+ * @return {{x: Number, y: Number, dir: String}}?
+ * @nullable 
+ */
+function move(from, obstacles) {
+    // if (from === null) return null; // extra precaution
+    let {x, y, dir} = from;
+    switch (dir) {
+        case '^': x -= 1; break;
+        case '>': y += 1; break;
+        case 'v': x += 1; break;
+        case '<': y -= 1; break;
+    }
+
+    if (x < 0 || y < 0 || x > MAZE_WIDTH - 1 || y > MAZE_HEIGHT - 1)
+        return null;
+
+    // Obstacle: rotate
+    if ( obstacles.has( packXY(x, y) ) ) {
+        dir = redirect[dir];
+        // Note: DO NOT step in rotation direction,
+        // there could be more than one consequent rotations
+        x = from.x;
+        y = from.y;
+    }
+    return {x, y, dir};
+};
+
+
+// Part 1
+// List of steps will also be used in the Part 2
+const steps = new Set();
+steps.add( packXY(INIT_X, INIT_Y) ); // add initial position
+let footmark = {x: INIT_X, y: INIT_Y, dir: INIT_DIR};
+while (footmark = move(footmark, Obstacles)) 
+    steps.add( packXY(footmark.x, footmark.y) );
+
+console.log(steps.size); // Part 1 result
+
+
+// Part 2
+// Intentionally remove the starting position
+steps.delete( packXY(INIT_X, INIT_Y) );
+
+let loopsCount = 0;
+steps.forEach(obstacle => {   
+    // const [oX, oY] = unpackXY(obstacle);
+
+    // Map to save footprint directions
+    const footprints = new Map();
+
+    // Add obstacle to test
+    Obstacles.add(obstacle);
+
+    // Starting position
+    let footmark = {x: INIT_X, y: INIT_Y, dir: INIT_DIR};
+
+    while (footmark = move(footmark, Obstacles)) {
+        let footCoords = packXY(footmark.x, footmark.y);
+
+        // If we alreade walked here in the same direction, that's a loop
+        if (footprints.get(footCoords) === footmark.dir) {
+            loopsCount++;
+            break;
+        };
+
+        // It is important NOT to rewrite previously walked direction, so only the first walk dir should be stored
+        if ( !footprints.has(footCoords) ) {
+            // Mark the map with current direction to detect loops
+            footprints.set(footCoords, footmark.dir);
+        }
+    }
+
+    Obstacles.delete(obstacle);
+});
+
+console.log(loopsCount);
