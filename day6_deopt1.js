@@ -152,20 +152,19 @@ INPUT = `....#.....
 
 
 const INITIAL_MAP = INPUT.split('\n').map(v => v.split(''));
-const MAZE_WIDTH = INITIAL_MAP.length;
-const MAZE_HEIGHT = INITIAL_MAP[0]?.length;
-const SHIFT = parseInt(Math.log(MAZE_WIDTH)/Math.log(2))
+const X_MAX = INITIAL_MAP.length - 1;
+const Y_MAX = INITIAL_MAP[0]?.length - 1;
 
 let INIT_X, INIT_Y, INIT_DIR;
 let INIT_OBSTACLES = new Set();
 
 
-const packXY = (x, y) => (x << SHIFT) + y;
-// const unpackXY = coords => [coords >> SHIFT, coords % (1 << SHIFT)];
+const packXY = (x, y) => x * (X_MAX+1) + y;
+// const unpackXY = coords => [parseInt(coords / (X_MAX+1)), coords % (X_MAX+1)];
 
 // Save initial state
-for (let i = 0; i < MAZE_WIDTH; i++)
-    for (let j = 0; j < MAZE_HEIGHT; j++) {
+for (let i = 0; i <= X_MAX; i++)
+    for (let j = 0; j <= Y_MAX; j++) {
         if (INITIAL_MAP[i][j] === '^') [INIT_X, INIT_Y, INIT_DIR] = [i, j, INITIAL_MAP[i][j]];
         if (INITIAL_MAP[i][j] === '#') INIT_OBSTACLES.add( packXY(i, j) );
     }
@@ -193,7 +192,7 @@ function move(from, obstacles) {
         case '<': y -= 1; break;
     }
 
-    if (x < 0 || y < 0 || x > MAZE_WIDTH - 1 || y > MAZE_HEIGHT - 1)
+    if (x < 0 || y < 0 || x > X_MAX || y > Y_MAX)
         return null;
 
     // Obstacle: rotate
