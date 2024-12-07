@@ -875,7 +875,7 @@ function generatePermutations(n, base) {
     // For every int between 0 and max integer of that base
     for (let i = 0; i <= maxN; i++) {
         // Convert to binary, pad with 0, and push to the result
-        states.push( i.toString(base).padStart(n, '0') );
+        states.push( i.toString(base).padStart(n, '0').split('') );
     }
   
     return states;
