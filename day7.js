@@ -885,7 +885,7 @@ function generatePermutations(n, base) {
 // Part 1
 const correct = RECORDS.filter(r => {
     let [total, list] = r;
-    const opsPermutations = generatePermutations(list.length - 1).map(op => op.split(''));
+    const opsPermutations = generatePermutations(list.length - 1);
 
     for (const ops of opsPermutations) {
         const val = ops.reduce((val, op, i) => {
@@ -906,7 +906,7 @@ console.log(res);
 // Part 2
 const correct2 = RECORDS.filter(r => {
     let [total, list] = r;
-    const opsPermutations = generatePermutations(list.length - 1, 3).map(op => op.split(''));
+    const opsPermutations = generatePermutations(list.length - 1, 3);
 
     for (const ops of opsPermutations) {
         const val = ops.reduce((val, op, i) => {
