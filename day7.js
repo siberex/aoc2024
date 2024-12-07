@@ -863,10 +863,85 @@ const RECORDS = INPUT.split('\n').map(r => {
     return [parseInt(total), list.split(' ').map(Number)];
 });
 
+
+function generatePermutations(n, base) {
+    if (!base) base = 2;
+    const digit = (base - 1).toString();
+  
+    // Max integer of the requested base of the length = n
+    var maxN = parseInt(digit.repeat(n), base);
+  
+    const states = [];
+    // For every int between 0 and max integer of that base
+    for (let i = 0; i <= maxN; i++) {
+        // Convert to binary, pad with 0, and push to the result
+        states.push( i.toString(base).padStart(n, '0') );
+    }
+  
+    return states;
+}
+
+const correct = RECORDS.filter(r => {
+    let [total, list] = r;
+    const opsPermutations = generatePermutations(list.length - 1).map(op => op.split(''));
+
+    for (const ops of opsPermutations) {
+        let val = list[0];
+        for (let i = 0; i < ops.length; i++) {
+            let op = ops[i];
+            if (op === '0') {
+                val += list[i+1];
+            } else if (op === '1') {
+                val *= list[i+1];
+            }
+        }
+        if (val === total) return true;
+    }
+    
+    return false;
+});
+
+const res = correct.map(r => r[0]).reduce((sum, n) => {sum += n; return sum;}, 0);
+
+console.log(res);
+
+
+const correct2 = RECORDS.filter(r => {
+    let [total, list] = r;
+    const opsPermutations = generatePermutations(list.length - 1, 3).map(op => op.split(''));
+
+    for (const ops of opsPermutations) {
+        let val = BigInt(list[0]);
+        for (let i = 0; i < ops.length; i++) {
+            // safe to expect i+1 from list, ops will allways be one less
+            const op = ops[i];
+            const next = BigInt(list[i+1]);
+            if (op === '0') {
+                val = val + next;
+            } else if (op === '1') {
+                val = val * next;
+            } else  if (op === '2') {
+                val *= BigInt(10 ** next.toString().length);
+                val = val + next;
+            }
+        }
+        if (val == total) return true;
+    }
+    
+    return false;
+});
+
+const res2 = correct2.map(r => r[0]).reduce((sum, n) => {sum += n; return sum;}, 0);
+
+console.log(res2);
+
+
+
+// This one is not used, I will stash it here just in case
 function permute(permutation) {
     let length = permutation.length,
         result = [permutation.slice()],
-        c = new Array(length).fill(0),
+        c = Array(length).fill(0),
         i = 1, k, p;
 
     while (i < length) {
@@ -885,84 +960,3 @@ function permute(permutation) {
     }
     return result;
 }
-
-function generateStates(n){
-    var states = [];
-  
-    // Convert to decimal
-    var maxDecimal = parseInt("1".repeat(n),2);
-  
-    // For every number between 0->decimal
-    for(var i = 0; i <= maxDecimal; i++){
-      // Convert to binary, pad with 0, and add to final results
-      states.push(i.toString(2).padStart(n,'0'));
-    }
-  
-    return states;
-}
-
-function generateStates3(n){
-    var states = [];
-  
-    // Convert to decimal
-    var maxDecimal = parseInt("2".repeat(n),3);
-  
-    // For every number between 0->decimal
-    for(var i = 0; i <= maxDecimal; i++){
-      // Convert to binary, pad with 0, and add to final results
-      states.push(i.toString(3).padStart(n,'0'));
-    }
-  
-    return states;
-}
-
-const correct = RECORDS.filter(r => {
-    let [total, list] = r;
-    const opsPermutations = generateStates(list.length - 1).map(op => op.split(''));
-
-    for (const ops of opsPermutations) {
-        let val = list[0];
-        for (let i = 0; i < ops.length; i++) {
-            let op = ops[i];
-            if (op === '0') {
-                val +=  list[i+1];
-            } else if (op === '1') {
-                val *=  list[i+1];
-            }
-        }
-        if (val === total) return true;
-    }
-    
-    return false;
-});
-
-const res = correct.map(r => r[0]).reduce((sum, n) => {sum += n; return sum;}, 0);
-
-console.log(res);
-
-
-const correct2 = RECORDS.filter(r => {
-    let [total, list] = r;
-    const opsPermutations = generateStates3(list.length - 1).map(op => op.split(''));
-
-    for (const ops of opsPermutations) {
-        let val = list[0];
-        for (let i = 0; i < ops.length; i++) {
-            const op = ops[i], next = list[i+1];
-            if (op === '0') {
-                val += next;
-            } else if (op === '1') {
-                val *= next;
-            } else  if (op === '2') {
-                val = parseInt(val.toString() + next.toString());
-            }
-        }
-        if (val === total) return true;
-    }
-    
-    return false;
-});
-
-const res2 = correct2.map(r => r[0]).reduce((sum, n) => {sum += n; return sum;}, 0);
-
-console.log(res2);
