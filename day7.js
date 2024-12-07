@@ -881,20 +881,18 @@ function generatePermutations(n, base) {
     return states;
 }
 
+
+// Part 1
 const correct = RECORDS.filter(r => {
     let [total, list] = r;
     const opsPermutations = generatePermutations(list.length - 1).map(op => op.split(''));
 
     for (const ops of opsPermutations) {
-        let val = list[0];
-        for (let i = 0; i < ops.length; i++) {
-            let op = ops[i];
-            if (op === '0') {
-                val += list[i+1];
-            } else if (op === '1') {
-                val *= list[i+1];
-            }
-        }
+        const val = ops.reduce((val, op, i) => {
+            // It is safe to expect i+1 from the list: ops will allways be one less than the list
+            const next = list[i + 1];
+            return op === '0' ? val + next : val * next;
+        }, list[0]);
         if (val === total) return true;
     }
     
@@ -902,37 +900,31 @@ const correct = RECORDS.filter(r => {
 });
 
 const res = correct.map(r => r[0]).reduce((sum, n) => {sum += n; return sum;}, 0);
-
 console.log(res);
 
 
+// Part 2
 const correct2 = RECORDS.filter(r => {
     let [total, list] = r;
     const opsPermutations = generatePermutations(list.length - 1, 3).map(op => op.split(''));
 
     for (const ops of opsPermutations) {
-        let val = BigInt(list[0]);
-        for (let i = 0; i < ops.length; i++) {
-            // safe to expect i+1 from list, ops will allways be one less
-            const op = ops[i];
-            const next = BigInt(list[i+1]);
-            if (op === '0') {
-                val = val + next;
-            } else if (op === '1') {
-                val = val * next;
-            } else  if (op === '2') {
-                val *= BigInt(10 ** next.toString().length);
-                val = val + next;
+        const val = ops.reduce((val, op, i) => {
+            // It is safe to expect i+1 from the list: ops will allways be one less than the list
+            const next = list[i + 1];
+            switch (op) {
+                case '0': return val + next;
+                case '1': return val * next;
+                case '2': return val * (10 ** next.toString().length) + next;
             }
-        }
-        if (val == total) return true;
+        }, list[0]);
+        if (val === total) return true;
     }
     
     return false;
 });
 
 const res2 = correct2.map(r => r[0]).reduce((sum, n) => {sum += n; return sum;}, 0);
-
 console.log(res2);
 
 
