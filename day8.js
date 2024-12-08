@@ -1,4 +1,7 @@
-// Day 7
+// Day 8
+
+// Note: This one looks kinda similar to the https://adventofcode.com/2019/day/10
+
 
 /*
 let INPUT = await fetch('https://adventofcode.com/2024/day/8/input')
@@ -79,14 +82,8 @@ ANTENNAS.forEach((row, i) => {
 // console.log(ANT_COORDS);
 
 
-// let mapAntinodes = Array(WIDTH).fill(null, 0, WIDTH).map(v => Array(HEIGHT).fill('.', 0, HEIGHT));
-let mapAntinodes = structuredClone(ANTENNAS);
-let listAntinodes = [];
-
-for (let [ant, listCoords] of Object.entries(ANT_COORDS)) {
-    // let ant = 'T';
-    // let listCoords = ANT_COORDS['T']; // debug
-    
+let mapAntinodes1 = structuredClone(ANTENNAS);
+for (let [ant, listCoords] of Object.entries(ANT_COORDS)) {    
     for (let i = 0; i < listCoords.length; i++) {
         for (let j = i; j < listCoords.length; j++) {
             let [x1, y1] = listCoords[i];
@@ -103,14 +100,14 @@ for (let [ant, listCoords] of Object.entries(ANT_COORDS)) {
 
             if (!isOutOfBounds(x2, y2)) {
                 if (ANTENNAS[x2][y2] !== ant)
-                    mapAntinodes[x2][y2] = '#';
+                    mapAntinodes1[x2][y2] = '#';
 
                 // x2 += dx;
                 // y2 += dy;
             }
             if (!isOutOfBounds(x1, y1)) {
                 if (ANTENNAS[x1][y1] !== ant)
-                    mapAntinodes[x1][y1] = '#';
+                    mapAntinodes1[x1][y1] = '#';
 
                 // x1 -= dx;
                 // y1 -= dy;
@@ -120,7 +117,58 @@ for (let [ant, listCoords] of Object.entries(ANT_COORDS)) {
 };
 
 
-console.log(mapAntinodes.map(row => row.join('')).join('\n')); // Show map
-let res1 = mapAntinodes.map(row => row.join('')).join('\n').match(/#/g)?.length;
+// console.log(mapAntinodes1.map(row => row.join('')).join('\n')); // Show map
+let res1 = mapAntinodes1.map(row => row.join('')).join('\n').match(/#/g)?.length;
 console.log(res1);
+
+
+
+// let mapAntinodes = Array(WIDTH).fill(null, 0, WIDTH).map(v => Array(HEIGHT).fill('.', 0, HEIGHT));
+let mapAntinodes2 = structuredClone(ANTENNAS);
+
+for (let [ant, listCoords] of Object.entries(ANT_COORDS)) {
+    // let ant = 'T';
+    // let listCoords = ANT_COORDS['T']; // debug
+    
+    for (let i = 0; i < listCoords.length; i++) {
+        for (let j = i; j < listCoords.length; j++) {
+            let [x1, y1] = listCoords[i];
+            let [x2, y2] = listCoords[j];
+            
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+
+            if (dx == 0 && dy == 0) continue;
+
+            mapAntinodes2[x1][y1] = '#';
+            mapAntinodes2[x2][y2] = '#';
+    
+            x1 -= dx;
+            y1 -= dy;
+
+            x2 += dx;
+            y2 += dy;
+
+            while (!isOutOfBounds(x2, y2)) {
+                // if (ANTENNAS[x2][y2] !== ant)
+                    mapAntinodes2[x2][y2] = '#';
+
+                x2 += dx;
+                y2 += dy;
+            }
+            while (!isOutOfBounds(x1, y1)) {
+                // if (ANTENNAS[x1][y1] !== ant)
+                    mapAntinodes2[x1][y1] = '#';
+
+                x1 -= dx;
+                y1 -= dy;
+            }
+        }
+    }
+};
+
+
+// console.log(mapAntinodes2.map(row => row.join('')).join('\n')); // Show map
+let res2 = mapAntinodes2.map(row => row.join('')).join('\n').match(/#/g)?.length;
+console.log(res2);
 
