@@ -62,7 +62,7 @@ const ANTENNAS = INPUT.split('\n').map(r => r.split(''));
 const WIDTH = ANTENNAS.length;
 const HEIGHT = ANTENNAS[0]?.length;
 
-const isOutOfBounds = (x, y) => x < 0 || y < 0 || x > WIDTH - 1 || y > HEIGHT - 1;
+const isOutOfBounds = (x, y) => x < 0 || y < 0 || x > (WIDTH - 1) || y > (HEIGHT - 1);
 
 const antinodes = new Set();
 
@@ -84,7 +84,8 @@ let mapAntinodes = structuredClone(ANTENNAS);
 let listAntinodes = [];
 
 for (let [ant, listCoords] of Object.entries(ANT_COORDS)) {
-    // let listCoords = ANT_COORDS[0]; // debug
+    // let ant = 'T';
+    // let listCoords = ANT_COORDS['T']; // debug
     
     for (let i = 0; i < listCoords.length; i++) {
         for (let j = i; j < listCoords.length; j++) {
@@ -94,13 +95,25 @@ for (let [ant, listCoords] of Object.entries(ANT_COORDS)) {
             const dx = x2 - x1;
             const dy = y2 - y1;
     
-            if (!isOutOfBounds(x2 + dx, y2 + dy)) {
-                if (ANTENNAS[x2 + dx] && ANTENNAS[x2 + dx][y2 + dy] !== ant)
-                    mapAntinodes[x2 + dx][y2 + dy] = '#';
+            x1 -= dx;
+            y1 -= dy;
+
+            x2 += dx;
+            y2 += dy;
+
+            if (!isOutOfBounds(x2, y2)) {
+                if (ANTENNAS[x2][y2] !== ant)
+                    mapAntinodes[x2][y2] = '#';
+
+                // x2 += dx;
+                // y2 += dy;
             }
-            if (!isOutOfBounds(x1 - dx, y1 - dy)) {
-                if (ANTENNAS[x1 - dx] && ANTENNAS[x1 - dx][y1 - dy] !== ant)
-                    mapAntinodes[x1 - dx][y1 - dy] = '#';
+            if (!isOutOfBounds(x1, y1)) {
+                if (ANTENNAS[x1][y1] !== ant)
+                    mapAntinodes[x1][y1] = '#';
+
+                // x1 -= dx;
+                // y1 -= dy;
             }
         }
     }
