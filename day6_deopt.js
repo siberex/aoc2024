@@ -6,7 +6,6 @@ const INPUT = await fs.readFile('./input/6.txt', { encoding: 'utf8' });
 const INITIAL_MAP = INPUT.split('\n').map(v => v.split(''));
 const MAZE_WIDTH = INITIAL_MAP.length;
 const MAZE_HEIGHT = INITIAL_MAP[0]?.length;
-const SHIFT = parseInt(Math.log(MAZE_WIDTH)/Math.log(2)) + 1;
 
 let INIT_X, INIT_Y, INIT_DIR;
 let Obstacles = new Set();
@@ -15,6 +14,7 @@ const packXY = (x, y) => x * MAZE_WIDTH + y;
 // const unpackXY = coords => [parseInt(coords / MAZE_WIDTH), coords % MAZE_WIDTH];
 
 // Bitwise shift provide no benefits here:
+// const SHIFT = parseInt(Math.log(MAZE_WIDTH)/Math.log(2)) + 1;
 // const packXY = (x, y) => (x << SHIFT) + y;
 // const unpackXY = coords => [coords >> SHIFT, coords % (1 << SHIFT)];
 
