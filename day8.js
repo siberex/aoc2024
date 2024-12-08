@@ -37,7 +37,7 @@ for (let [ant, listCoords] of ANT_COORDS.entries()) {
             const dx = x2 - x1;
             const dy = y2 - y1;
             
-            if (dx == 0 && dy == 0) continue;
+            if (dx === 0 && dy === 0) continue;
     
             mapHarmonics[x1][y1] = '#';
             mapHarmonics[x2][y2] = '#';
@@ -58,12 +58,12 @@ for (let [ant, listCoords] of ANT_COORDS.entries()) {
             }
 
             while (!isOutOfBounds(x2, y2)) {
-                mapHarmonics[x2][y2] = '#';
+                if (ANTENNAS[x2][y2] !== ant) mapHarmonics[x2][y2] = '#';
                 x2 += dx;
                 y2 += dy;
             }
             while (!isOutOfBounds(x1, y1)) {
-                mapHarmonics[x1][y1] = '#';
+                if (ANTENNAS[x1][y1] !== ant) mapHarmonics[x1][y1] = '#';
                 x1 -= dx;
                 y1 -= dy;
             }

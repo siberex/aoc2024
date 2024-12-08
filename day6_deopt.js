@@ -1,22 +1,7 @@
 // AoC2024. Day 6. Deoptimized version
 
-let INPUT = await fetch('https://adventofcode.com/2024/day/6/input')
-    .then(response => response.text())
-    .catch(err => console.error(err));
-
-/*
-INPUT = `....#.....
-.........#
-..........
-..#.......
-.......#..
-..........
-.#..^.....
-........#.
-#.........
-......#...`;
-*/
-
+import fs from 'node:fs/promises';
+const INPUT = await fs.readFile('./input/6.txt', { encoding: 'utf8' });
 
 const INITIAL_MAP = INPUT.split('\n').map(v => v.split(''));
 const MAZE_WIDTH = INITIAL_MAP.length;
