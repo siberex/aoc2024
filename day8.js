@@ -65,7 +65,7 @@ const ANTENNAS = INPUT.split('\n').map(r => r.split(''));
 const WIDTH = ANTENNAS.length;
 const HEIGHT = ANTENNAS[0]?.length;
 
-const isOutOfBounds = (x, y) => x < 0 || y < 0 || x > (WIDTH - 1) || y > (HEIGHT - 1);
+const isOutOfBounds = (x, y) => x < 0 || y < 0 || x > WIDTH - 1 || y > HEIGHT - 1;
 
 const antinodes = new Set();
 
@@ -75,15 +75,16 @@ ANTENNAS.forEach((row, i) => {
     row.forEach((loc, j) => {
         if (loc === '.') return;
         if (ANT_COORDS[loc])
-             ANT_COORDS[loc].push([i, j]);
-        else ANT_COORDS[loc] = [[i, j]];
+            ANT_COORDS[loc].push([i, j]);
+        else 
+            ANT_COORDS[loc] = [ [i, j] ];
     });
 });
 // console.log(ANT_COORDS);
 
 
 let mapAntinodes1 = structuredClone(ANTENNAS);
-for (let [ant, listCoords] of Object.entries(ANT_COORDS)) {    
+for (let [ant, listCoords] of Object.entries(ANT_COORDS)) {
     for (let i = 0; i < listCoords.length; i++) {
         for (let j = i; j < listCoords.length; j++) {
             let [x1, y1] = listCoords[i];
@@ -91,6 +92,8 @@ for (let [ant, listCoords] of Object.entries(ANT_COORDS)) {
             
             const dx = x2 - x1;
             const dy = y2 - y1;
+            
+            if (dx == 0 && dy == 0) continue;
     
             x1 -= dx;
             y1 -= dy;
@@ -101,16 +104,10 @@ for (let [ant, listCoords] of Object.entries(ANT_COORDS)) {
             if (!isOutOfBounds(x2, y2)) {
                 if (ANTENNAS[x2][y2] !== ant)
                     mapAntinodes1[x2][y2] = '#';
-
-                // x2 += dx;
-                // y2 += dy;
             }
             if (!isOutOfBounds(x1, y1)) {
                 if (ANTENNAS[x1][y1] !== ant)
                     mapAntinodes1[x1][y1] = '#';
-
-                // x1 -= dx;
-                // y1 -= dy;
             }
         }
     }
@@ -122,14 +119,9 @@ let res1 = mapAntinodes1.map(row => row.join('')).join('\n').match(/#/g)?.length
 console.log(res1);
 
 
-
 // let mapAntinodes = Array(WIDTH).fill(null, 0, WIDTH).map(v => Array(HEIGHT).fill('.', 0, HEIGHT));
 let mapAntinodes2 = structuredClone(ANTENNAS);
-
 for (let [ant, listCoords] of Object.entries(ANT_COORDS)) {
-    // let ant = 'T';
-    // let listCoords = ANT_COORDS['T']; // debug
-    
     for (let i = 0; i < listCoords.length; i++) {
         for (let j = i; j < listCoords.length; j++) {
             let [x1, y1] = listCoords[i];
@@ -150,16 +142,12 @@ for (let [ant, listCoords] of Object.entries(ANT_COORDS)) {
             y2 += dy;
 
             while (!isOutOfBounds(x2, y2)) {
-                // if (ANTENNAS[x2][y2] !== ant)
-                    mapAntinodes2[x2][y2] = '#';
-
+                mapAntinodes2[x2][y2] = '#';
                 x2 += dx;
                 y2 += dy;
             }
             while (!isOutOfBounds(x1, y1)) {
-                // if (ANTENNAS[x1][y1] !== ant)
-                    mapAntinodes2[x1][y1] = '#';
-
+                mapAntinodes2[x1][y1] = '#';
                 x1 -= dx;
                 y1 -= dy;
             }
