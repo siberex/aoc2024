@@ -4,14 +4,14 @@ import fs from 'node:fs/promises';
 const INPUT = await fs.readFile('./input/1.txt', { encoding: 'utf8' });
 
 // list of tuples
-const lists = INPUT.split("\n").map(v => v.split(/\s+/).map(Number));
+const lists = INPUT.split('\n').map(v => v.split(/\s+/).map(Number));
 
 // put each part of the tuple to it's own list
 const list1 = [];
 const list2 = [];
 lists.forEach(tuple => {
-  list1.push(tuple.at(0));
-  list2.push(tuple.at(1));
+    list1.push(tuple.at(0));
+    list2.push(tuple.at(1));
 });
 
 // Part1

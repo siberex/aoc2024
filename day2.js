@@ -3,15 +3,17 @@
 import fs from 'node:fs/promises';
 const INPUT = await fs.readFile('./input/2.txt', { encoding: 'utf8' });
 
-const reports = INPUT.split("\n").map(v => v.split(/\s+/).map(Number));
+const reports = INPUT.split("\n").filter(v => v).map(v => v.split(/\s+/).map(Number));
 
 function is_safe(lvl) {
     const is_increasing = (lvl[1] - lvl[0]) > 0;
     for (let i = 1; i < lvl.length; i++) {
-        if ( Math.abs(lvl[i] - lvl[i-1]) > 3
-             || lvl[i-1] == lvl[i]
-             || ( is_increasing && lvl[i-1] > lvl[i] )
-             || ( !is_increasing && lvl[i-1] < lvl[i]) ) return false;
+        const diff = lvl[i] - lvl[i - 1];
+        if ( diff === 0
+            || Math.abs(diff) > 3
+            || ( is_increasing && diff < 0 )
+            || ( !is_increasing && diff > 0 )
+        ) return false;
     }
     return true;
 }
