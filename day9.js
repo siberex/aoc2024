@@ -8,12 +8,24 @@ const INPUT = await fs.readFile('./input/9.txt', { encoding: 'utf8' });
 const DATA = INPUT.split('').map(Number);
 
 
+const getChecksum = blocks => blocks.reduce((checksum, b, i) => b !== null ? checksum + b * i : checksum, 0);
+/*
+// could be faster?
+const getChecksum = blocks => {
+    let checksum = 0;
+    for (let i = 0; i < blocks.length; i++) {
+        const b = blocks[i];
+        if (b) checksum += b.id * i;
+    }
+    return checksum;
+}
+*/
 
 let id = 0;
 let pos = 0;
 let files = [];
 let space = [];
-let blocks = [];
+let INIT_BLOCKS = [], blocks = [];
 for (let i = 0; i < DATA.length; i++) {
     const size = DATA[i];
     let block = [];
@@ -26,7 +38,7 @@ for (let i = 0; i < DATA.length; i++) {
             size,
         });
 
-        block = Array(size).fill({id}, 0, size);
+        block = Array(size).fill(id, 0, size);
 
         id++;
     } else {
@@ -41,17 +53,16 @@ for (let i = 0; i < DATA.length; i++) {
 
     }
     pos += DATA[i];
-    blocks = blocks.concat(block);
+    INIT_BLOCKS = INIT_BLOCKS.concat(block);
 }
 
 // console.log(files);
 // console.log(space);
+// console.log( INIT_BLOCKS.map(id => id !== null ? id.toString()[0] : '.').join('') );
 
-// console.log( blocks.map(b => b ? b.id.toString()[0] : '.').join('') );
 
 // Part 1
-
-/*
+blocks = structuredClone(INIT_BLOCKS);
 for (let i = 0; i < blocks.length; i++) {
     const b = blocks[i];
     if (b === null) {
@@ -73,21 +84,12 @@ for (let i = 0; i < blocks.length; i++) {
         }
     }
 }
-// const fsPrint2 = blocks.map(b => b ? b.id.toString()[0] : '.').join('');
-// console.log(fsPrint2);
+// console.log( blocks.map(id => id !== null ? id.toString()[0] : '.').join('') ); // debug
+console.log(getChecksum(blocks));
 
-let checksum = 0;
-for (let i = 0; i < blocks.length; i++) {
-    const b = blocks[i];
-    if (b) checksum += b.id * i;
-}
-
-console.log(checksum);
-*/
 
 // Part 2
-
-
+blocks = structuredClone(INIT_BLOCKS);
 for (let fileIndex = files.length - 1; fileIndex > 0; fileIndex--) {
     let f = files[fileIndex];
     if (f.size === 0) continue;
@@ -100,7 +102,7 @@ for (let fileIndex = files.length - 1; fileIndex > 0; fileIndex--) {
                 blocks[i] = null;
             }
             for (let i = s.pos; i < s.pos + Math.min(f.size, s.size); i++) {
-                blocks[i] = {id: f.id};
+                blocks[i] = f.id;
             }
     
             s.size -= f.size;
@@ -112,24 +114,5 @@ for (let fileIndex = files.length - 1; fileIndex > 0; fileIndex--) {
 
 };
 
-
-// console.log( blocks.map(b => b ? b.id.toString()[0] : '.').join('') ); // debug
-
-let checksum = 0;
-for (let i = 0; i < blocks.length; i++) {
-    const b = blocks[i];
-    if (b) checksum += b.id * i;
-}
-
-console.log(checksum);
-
-// OOPS
-// 8648369083555
-// your answer is too high
-
-// 6480505549442
-// your answer is too high
-
-
-
-// console.log(space);
+// console.log( blocks.map(id => id !== null ? id.toString()[0] : '.').join('') ); // debug
+console.log(getChecksum(blocks));
