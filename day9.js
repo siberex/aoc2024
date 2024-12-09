@@ -51,6 +51,8 @@ for (let i = 0; i < DATA.length; i++) {
 // console.log(fsPrint);
 
 // Part 1
+
+/*
 for (let i = 0; i < blocks.length; i++) {
     const b = blocks[i];
     if (b === null) {
@@ -82,45 +84,56 @@ for (let i = 0; i < blocks.length; i++) {
 }
 
 console.log(checksum);
-
+*/
 
 // Part 2
 
-/*
-for (let spaceIndex = 0; spaceIndex < space.length; ++spaceIndex) {
+
+for (let spaceIndex = 0; spaceIndex < space.length; spaceIndex++) {
     let s = space[spaceIndex];
 
-    let f = files.pop();
-    if (f === undefined) continue;
+    for (let fileIndex = files.length - 1; fileIndex > spaceIndex; fileIndex--) {
+        let f = files[fileIndex];
+        if (f.size === 0) continue;
 
-    for (let i = f.pos; i < f.pos + f.size; i++) {
-        blocks[i] = null;
-    }
-
-    if (s.size === f.size) {}
-    for (let i = s.pos; i < s.pos + Math.min(f.size, s.size); i++) {
-        blocks[i] = {id: f.id};
-    }
-
-    if (s.size > f.size) {
-        s.size -= f.size;
-        s.pos += f.size
-        if (s.size > 0) {
-            --spaceIndex;
-        }
-    } else if (s.size <= f.size) {
-        f.size -= s.size;
-        // f.pos = ...;
-        files.push(f);
-        for (let i = f.pos; i < f.pos + f.size; i++) {
-            blocks[i] = {id: f.id};
+        if (s.size >= f.size) {
+            for (let i = f.pos; i < f.pos + f.size; i++) {
+                blocks[i] = null;
+            }
+            for (let i = s.pos; i < s.pos + Math.min(f.size, s.size); i++) {
+                blocks[i] = {id: f.id};
+            }
+    
+            s.size -= f.size;
+            s.pos += f.size;
+            f.size = 0;
+            // if (s.size > 0) {
+            //     --spaceIndex;
+            // }
         }
     }
+
 };
-*/
 
 
 // const fsPrint2 = blocks.map(b => b ? b.id.toString()[0] : '.').join('');
 // console.log(fsPrint2);
+
+let checksum = 0;
+for (let i = 0; i < blocks.length; i++) {
+    const b = blocks[i];
+    if (b) checksum += b.id * i;
+}
+
+console.log(checksum);
+
+// OOPS
+// 8648369083555
+// your answer is too high
+
+// 6480505549442
+// your answer is too high
+
+
 
 // console.log(space);
