@@ -63,27 +63,17 @@ for (let i = 0; i < DATA.length; i++) {
 
 // Part 1
 blocks = structuredClone(INIT_BLOCKS);
-for (let i = 0; i < blocks.length; i++) {
-    const b = blocks[i];
-    if (b === null) {
-        let lastFileBlock = null;
-        let lastFileBlockIndex = null;
+blocks.forEach((b, i) => {
+    if (b !== null) return; // Skip non-empty blocks
+    // Find the last block assigned to file and not empty space
+    const lastFileBlockIndex = blocks.findLastIndex((bb, j) => bb !== null && j > i);
 
-        // find last block with file id
-        for (let j = blocks.length - 1; j > i; j--) {
-            if (blocks[j] !== null) {
-                lastFileBlockIndex = j;
-                lastFileBlock = blocks[j];
-                break;
-            }
-        }
-
-        if (lastFileBlock) {
-            blocks[i] = lastFileBlock;
-            blocks[lastFileBlockIndex] = null;
-        }
+    // Switch empty block with file block
+    if (lastFileBlockIndex !== -1) {
+        blocks[i] = blocks[lastFileBlockIndex];
+        blocks[lastFileBlockIndex] = null;
     }
-}
+});
 // console.log( blocks.map(id => id !== null ? id.toString()[0] : '.').join('') ); // debug
 console.log(getChecksum(blocks));
 
