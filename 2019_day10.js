@@ -1,7 +1,7 @@
 // Advent of Code 2019. Day 10
 
 import fs from 'node:fs/promises';
-const INPUT = await fs.readFile('./input/2019_10.txt', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./2019/10.test5', { encoding: 'utf8' });
 
 const DATA = INPUT.split('\n').map(r => r.split(''));
 const WIDTH = DATA.length;
@@ -113,8 +113,51 @@ COORDS.forEach(asteroid => {
 // console.log(visibleCounts);
 
 let maxCnt = 0;
-visibleCounts.forEach(cnt => {
-    if (cnt > maxCnt) maxCnt = cnt;
+let stationCoords = 0;
+visibleCounts.forEach((cnt, k) => {
+    if (cnt > maxCnt) {
+        maxCnt = cnt;
+        stationCoords = unpackXY(k);
+    }
 });
 
-console.log(maxCnt);
+// Part 1
+let [stationX, stationY] = stationCoords;
+// console.log(`${stationY},${stationX}: ${maxCnt}`);
+// console.log(maxCnt);
+
+// Part 2
+
+const map = structuredClone(DATA);
+map[stationX][stationY] = 'X';
+// console.log(map.map(row => row.join('')).join('\n')); // Show map
+
+
+COORDS.forEach(asteroid => {
+    let [x, y] = asteroid;
+
+    // Convert to polar coordiates treating station coords as [0, 0]
+    let relativeY = y - stationY;
+    let relativeX = x - stationX;
+
+    if (relativeX === 0 && relativeY === 0) return;
+
+
+    //... Rotate -90° (-π/2) to treat upward direction as 0
+    let radians = Math.atan2(relativeY, relativeX) - Math.PI/2;
+    let distance = parseInt(Math.sqrt(relativeX ** 2 + relativeY ** 2) * 1000);
+
+    let degrees = parseInt(radians * (180 / Math.PI));
+
+    console.log(`${y},${x},${degrees},${distance}`);
+
+});
+
+
+
+
+let x = 1, y = 10;
+// [-π; π] → [0; 2π] + rotate ...
+let radians = -Math.atan2(y, x) + Math.PI / 2;
+parseInt(-radians * (180 / Math.PI));
+
