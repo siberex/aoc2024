@@ -35,8 +35,8 @@ DATA.forEach((size, i) => {
     INIT_BLOCKS = INIT_BLOCKS.concat(block);
 });
 
-// console.log(files);
-// console.log(space);
+// console.log(files.length);
+// console.log(space.length);
 // console.log( INIT_BLOCKS.map(id => id !== null ? id.toString()[0] : '.').join('') );
 
 
@@ -59,25 +59,28 @@ console.log(getChecksum(blocks));
 
 // Part 2
 blocks = structuredClone(INIT_BLOCKS);
-for (let fileIndex = files.length - 1; fileIndex > 0; fileIndex--) {
-    let f = files[fileIndex];
-    if (f.size === 0) continue;
+space.forEach(s => {
+    let f = files.findLast(f => (f.size > 0) && (s.size >= f.size) && (s.pos < f.pos));
+    if (f === undefined) return;
 
-    space.forEach(s => {
-        if (s.size >= f.size && s.pos < f.pos) {
-            for (let i = f.pos; i < f.pos + f.size; i++) {
-                blocks[i] = null;
-            }
-            for (let i = s.pos; i < s.pos + Math.min(f.size, s.size); i++) {
-                blocks[i] = f.id;
-            }
-    
-            s.size -= f.size;
-            s.pos += f.size;
-            f.size = 0;
+    // While space block not exhausted, move there last suitable file block
+    while (s.size > 0 && f !== undefined) {
+
+        for (let i = f.pos; i < f.pos + f.size; i++) {
+            blocks[i] = null;
         }
-    });
-};
+        for (let i = s.pos; i < s.pos + Math.min(f.size, s.size); i++) {
+            blocks[i] = f.id;
+        }
+
+        s.size -= f.size;
+        s.pos += f.size;
+        f.size = 0;
+
+        f = files.findLast(f => (f.size > 0) && (s.size >= f.size) && (s.pos < f.pos));
+    }
+
+});
 
 // console.log( blocks.map(id => id !== null ? id.toString()[0] : '.').join('') ); // debug
 console.log(getChecksum(blocks));
