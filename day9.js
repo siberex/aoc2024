@@ -3,7 +3,7 @@
 import fs from 'node:fs/promises';
 
 // const INPUT = '12345';
-const INPUT = await fs.readFile('./input/9.test', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/9.txt', { encoding: 'utf8' });
 
 const DATA = INPUT.split('').map(Number);
 
@@ -47,8 +47,7 @@ for (let i = 0; i < DATA.length; i++) {
 // console.log(files);
 // console.log(space);
 
-// const fsPrint = blocks.map(b => b ? b.id.toString()[0] : '.').join('');
-// console.log(fsPrint);
+// console.log( blocks.map(b => b ? b.id.toString()[0] : '.').join('') );
 
 // Part 1
 
@@ -89,14 +88,14 @@ console.log(checksum);
 // Part 2
 
 
-for (let spaceIndex = 0; spaceIndex < space.length; spaceIndex++) {
-    let s = space[spaceIndex];
+for (let fileIndex = files.length - 1; fileIndex > 0; fileIndex--) {
+    let f = files[fileIndex];
+    if (f.size === 0) continue;
 
-    for (let fileIndex = files.length - 1; fileIndex > spaceIndex; fileIndex--) {
-        let f = files[fileIndex];
-        if (f.size === 0) continue;
+    for (let spaceIndex = 0; spaceIndex < space.length; spaceIndex++) {
+        let s = space[spaceIndex];
 
-        if (s.size >= f.size) {
+        if (s.size >= f.size && s.pos < f.pos) {
             for (let i = f.pos; i < f.pos + f.size; i++) {
                 blocks[i] = null;
             }
@@ -107,17 +106,14 @@ for (let spaceIndex = 0; spaceIndex < space.length; spaceIndex++) {
             s.size -= f.size;
             s.pos += f.size;
             f.size = 0;
-            // if (s.size > 0) {
-            //     --spaceIndex;
-            // }
+            
         }
     }
 
 };
 
 
-// const fsPrint2 = blocks.map(b => b ? b.id.toString()[0] : '.').join('');
-// console.log(fsPrint2);
+// console.log( blocks.map(b => b ? b.id.toString()[0] : '.').join('') ); // debug
 
 let checksum = 0;
 for (let i = 0; i < blocks.length; i++) {
