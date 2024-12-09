@@ -9,52 +9,31 @@ const DATA = INPUT.split('').map(Number);
 
 
 const getChecksum = blocks => blocks.reduce((checksum, b, i) => b !== null ? checksum + b * i : checksum, 0);
-/*
-// could be faster?
-const getChecksum = blocks => {
-    let checksum = 0;
-    for (let i = 0; i < blocks.length; i++) {
-        const b = blocks[i];
-        if (b) checksum += b.id * i;
-    }
-    return checksum;
-}
-*/
 
-let id = 0;
 let pos = 0;
-let files = [];
-let space = [];
+const files = [];
+const space = [];
 let INIT_BLOCKS = [], blocks = [];
-for (let i = 0; i < DATA.length; i++) {
-    const size = DATA[i];
-    let block = [];
+DATA.forEach((size, i) => {
+    let block = Array(size);
+    const item = {
+        id: i >> 1,
+        pos,
+        size,
+    };
 
     if (i % 2 === 0) {
         // File
-        files.push({
-            id,
-            pos,
-            size,
-        });
-
-        block = Array(size).fill(id, 0, size);
-
-        id++;
+        files.push(item);
+        block = block.fill(item.id, 0, size);
     } else {
         // Free space
-        if (size) space.push({
-            id: id - 1, // id after
-            pos,
-            size,
-        });
-
-        block = Array(size).fill(null, 0, size);
-
+        if (size) space.push(item);
+        block = block.fill(null, 0, size);
     }
-    pos += DATA[i];
+    pos += size;
     INIT_BLOCKS = INIT_BLOCKS.concat(block);
-}
+});
 
 // console.log(files);
 // console.log(space);
@@ -84,9 +63,7 @@ for (let fileIndex = files.length - 1; fileIndex > 0; fileIndex--) {
     let f = files[fileIndex];
     if (f.size === 0) continue;
 
-    for (let spaceIndex = 0; spaceIndex < space.length; spaceIndex++) {
-        let s = space[spaceIndex];
-
+    space.forEach(s => {
         if (s.size >= f.size && s.pos < f.pos) {
             for (let i = f.pos; i < f.pos + f.size; i++) {
                 blocks[i] = null;
@@ -98,10 +75,8 @@ for (let fileIndex = files.length - 1; fileIndex > 0; fileIndex--) {
             s.size -= f.size;
             s.pos += f.size;
             f.size = 0;
-            
         }
-    }
-
+    });
 };
 
 // console.log( blocks.map(id => id !== null ? id.toString()[0] : '.').join('') ); // debug
