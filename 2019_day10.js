@@ -133,7 +133,7 @@ map[stationX][stationY] = 'X';
 // console.log(map.map(row => row.join('')).join('\n')); // Show map
 
 
-const sorted = COORDS.filter(a => a[0] !== stationX || a[1] !== stationY).map(asteroid => {
+const unsorted = COORDS.filter(a => a[0] !== stationX || a[1] !== stationY).map(asteroid => {
     const [x, y] = asteroid;
 
     // Convert to polar coordiates treating station coords as [0, 0]
@@ -162,14 +162,57 @@ const sorted = COORDS.filter(a => a[0] !== stationX || a[1] !== stationY).map(as
     // Map [0; 2π] to [0; 2π)
     if (angle === 2 * Math.PI) angle = 0;
 
-    // Radians to integer degrees
-    const degrees = parseInt(angle * (180 / Math.PI));
-    // Integer distance
-    const distance = parseInt(Math.sqrt(relativeX ** 2 + relativeY ** 2) * 100);
+    // Radians to degrees
+    // Note: integer (0-digit) precision is not enough
+    const degrees = parseInt(angle * (180 / Math.PI) * 100) / 100;
+    // Distance, 2-digit precision is enough
+    const distance = parseInt(Math.sqrt(relativeX ** 2 + relativeY ** 2) * 100) / 100;
     // console.log(`${y},${x},${degrees},${distance}`);
     
     return [x, y, degrees, distance];
-}).sort((a, b) => {
+});
+
+
+const sortedInitial = unsorted.toSorted((a, b) => {
+    const [, , deg1, dist1] = a;
+    const [, , deg2, dist2] = b;
+    if (deg1 === deg2) return dist1 - dist2;
+    return deg1 - deg2;    
+});
+
+const lastSorted = sortedInitial.at(-1);
+const sorted = [];
+let lastAdded = sortedInitial.shift();
+sorted.push(lastAdded);
+let lastAngle = lastAdded.at(2);
+let ops = 1;
+
+while (sortedInitial.length && ops < unsorted.length) {
+    ops++;
+
+    const nextIndex = sortedInitial.findIndex(
+        ast => ast[2] > lastAdded[2]
+    );
+    if (nextIndex !== -1) {
+        [lastAdded] = sortedInitial.splice(nextIndex, 1);
+        sorted.push(lastAdded);
+        continue;
+    }
+
+    // hmm, how to prevent infinite loops?
+    if (lastAdded[2] === lastSorted[2]) {
+        lastAdded = sortedInitial.shift();
+        sorted.push(lastAdded);
+        continue;
+    }
+};
+
+
+
+//unsorted.all//
+
+/*
+const sorted = unsorted.toSorted((a, b) => {
     const [, , deg1, dist1] = a;
     const [, , deg2, dist2] = b;
 
@@ -182,31 +225,33 @@ const sorted = COORDS.filter(a => a[0] !== stationX || a[1] !== stationY).map(as
 
     // return dist1 * deg1 - dist2 * deg2;
 });
+*/
 
-
+/*
 let lastAngle = 0;
-sorted.forEach((a, i) => {
-    let [x, y, angle, distance] = a;
-    if (i === 0) {
-        lastAngle = angle;
-        return;
-    }
-    if (lastAngle === angle) {
+for (let i = 1; i < sorted.length; i++) {
+    let [x, y, angle, distance] = sorted[i];
+    if (lastAngle >= angle) {
         // Swap current item with the next one of different angle
-        const nextIndex = sorted.findIndex((aa, ii) =>  ii > i && aa[2] !== angle);
+        const nextIndex = sorted.findIndex((aa, ii) =>  ii > i && aa[2] > angle);
+        if (nextIndex === -1) {
+            lastAngle = 0;
+            continue;
+        }
         const tmp = sorted[nextIndex];
-        sorted[nextIndex] = a;
+        sorted[nextIndex] = sorted[i];
         sorted[i] = tmp;
         lastAngle = tmp[2];
     } else {
         lastAngle = angle;
     }
-});
+};
+*/
 
 
 console.log(`N:\tX,Y\tAngle\tDist`);
 sorted.map((a, i) => {
     // console.log(a);
     let [x, y, degrees, distance] = a;
-    console.log(`${i}:\t${y},${x}\t${degrees}\t${distance}`);
+    console.log(`${i+1}:\t${y},${x}\t${degrees}\t${distance}`);
 });
