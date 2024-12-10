@@ -35,7 +35,10 @@ function walkTrail(map, trailhead, score) {
 
     let [x, y] = trailhead;
     // end of the trail, mark map and return
-    if (map[x][y] === 9) {map[x][y] = -1; return 1 };
+    if (map[x][y] === 9) {
+        map[x][y] = -1;
+        return 1;
+    };
 
     let forks = getDirections(x, y);
     if (forks.length === 0) return 0; // dead end
