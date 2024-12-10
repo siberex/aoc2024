@@ -172,16 +172,41 @@ const sorted = COORDS.filter(a => a[0] !== stationX || a[1] !== stationY).map(as
 }).sort((a, b) => {
     const [, , deg1, dist1] = a;
     const [, , deg2, dist2] = b;
+
+    if (deg1 === deg2) {
+        return dist1 - dist2;
+    }
     
     if (deg2 > deg1) return -1;
     if (deg2 < deg1) return 1;
-    return dist1 - dist2;
 
     // return dist1 * deg1 - dist2 * deg2;
 });
 
+
+let lastAngle = 0;
+sorted.forEach((a, i) => {
+    let [x, y, angle, distance] = a;
+    if (i === 0) {
+        lastAngle = angle;
+        return;
+    }
+    if (lastAngle === angle) {
+        // Swap current item with the next one of different angle
+        const nextIndex = sorted.findIndex((aa, ii) =>  ii > i && aa[2] !== angle);
+        const tmp = sorted[nextIndex];
+        sorted[nextIndex] = a;
+        sorted[i] = tmp;
+        lastAngle = tmp[2];
+    } else {
+        lastAngle = angle;
+    }
+});
+
+
+console.log(`N:\tX,Y\tAngle\tDist`);
 sorted.map((a, i) => {
     // console.log(a);
     let [x, y, degrees, distance] = a;
-    console.log(`${i}: ${y},${x} (${degrees},${distance})`);
+    console.log(`${i}:\t${y},${x}\t${degrees}\t${distance}`);
 });
