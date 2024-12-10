@@ -3,7 +3,7 @@
 import fs from 'node:fs/promises';
 const INPUT = await fs.readFile('./2019/10.test5', { encoding: 'utf8' });
 
-const DATA = INPUT.split('\n').map(r => r.split(''));
+const DATA = INPUT.split('\n').filter(x=>x).map(r => r.split(''));
 const WIDTH = DATA.length;
 const HEIGHT = DATA[0]?.length;
 
@@ -133,31 +133,55 @@ map[stationX][stationY] = 'X';
 // console.log(map.map(row => row.join('')).join('\n')); // Show map
 
 
-COORDS.forEach(asteroid => {
-    let [x, y] = asteroid;
+const sorted = COORDS.filter(a => a[0] !== stationX || a[1] !== stationY).map(asteroid => {
+    const [x, y] = asteroid;
 
     // Convert to polar coordiates treating station coords as [0, 0]
-    let relativeY = y - stationY;
-    let relativeX = x - stationX;
 
-    if (relativeX === 0 && relativeY === 0) return;
+    // We initially deriving [x, y] from [-rows, cols], so let's map this back to normal [x, y]
+    const relativeY = -(x - stationX);
+    const relativeX = y - stationY;
 
+    // const relativeX = x - stationX;
+    // const relativeY = y - stationY;
 
-    //... Rotate -90° (-π/2) to treat upward direction as 0
-    let radians = Math.atan2(relativeY, relativeX) - Math.PI/2;
-    let distance = parseInt(Math.sqrt(relativeX ** 2 + relativeY ** 2) * 1000);
+    // Note: normal usage is atan2(y, x),
+    // but we need to rotate axis 90° (to treat the upward direction as 0),
+    // so it will become atan2(x, -y).
+    // let angle = Math.atan2(relativeX, -relativeY);
+    // but y already inverted, so
+    let angle = Math.atan2(relativeX, relativeY);
 
-    let degrees = parseInt(radians * (180 / Math.PI));
+    // Map atan2's output [0; π] & [-π; 0] to continous [0; 2π]
+    angle = angle >= 0 ? angle : 2 * Math.PI + angle;
+    
+    // Map [0; 2π] to [2π; 0] (reversed rotation)
+    // not really needed
+    // angle = 2 * Math.PI - angle;
 
-    console.log(`${y},${x},${degrees},${distance}`);
+    // Map [0; 2π] to [0; 2π)
+    if (angle === 2 * Math.PI) angle = 0;
 
+    // Radians to integer degrees
+    const degrees = parseInt(angle * (180 / Math.PI));
+    // Integer distance
+    const distance = parseInt(Math.sqrt(relativeX ** 2 + relativeY ** 2) * 100);
+    // console.log(`${y},${x},${degrees},${distance}`);
+    
+    return [x, y, degrees, distance];
+}).sort((a, b) => {
+    const [, , deg1, dist1] = a;
+    const [, , deg2, dist2] = b;
+    
+    if (deg2 > deg1) return -1;
+    if (deg2 < deg1) return 1;
+    return dist1 - dist2;
+
+    // return dist1 * deg1 - dist2 * deg2;
 });
 
-
-
-
-let x = 1, y = 10;
-// [-π; π] → [0; 2π] + rotate ...
-let radians = -Math.atan2(y, x) + Math.PI / 2;
-parseInt(-radians * (180 / Math.PI));
-
+sorted.map((a, i) => {
+    // console.log(a);
+    let [x, y, degrees, distance] = a;
+    console.log(`${i}: ${y},${x} (${degrees},${distance})`);
+});
