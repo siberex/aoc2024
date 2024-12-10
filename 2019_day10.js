@@ -1,7 +1,7 @@
 // Advent of Code 2019. Day 10
 
 import fs from 'node:fs/promises';
-const INPUT = await fs.readFile('./2019/10.test5', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./2019/10.txt', { encoding: 'utf8' });
 
 const DATA = INPUT.split('\n').filter(x=>x).map(r => r.split(''));
 const WIDTH = DATA.length;
@@ -123,7 +123,7 @@ visibleCounts.forEach((cnt, k) => {
 
 // Part 1
 let [stationX, stationY] = stationCoords;
-// console.log(`${stationY},${stationX}: ${maxCnt}`);
+console.log(`${stationY},${stationX}:\t${maxCnt}`);
 // console.log(maxCnt);
 
 // Part 2
@@ -208,50 +208,11 @@ while (sortedInitial.length && ops < unsorted.length) {
 };
 
 
+// console.log(`N:\tX,Y\tAngle\tDist`);
+// sorted.map((a, i) => {
+//     let [y, x, degrees, distance] = a;
+//     console.log(`${i+1}:\t${x},${y}\t${degrees}\t${distance}`);
+// });
 
-//unsorted.all//
-
-/*
-const sorted = unsorted.toSorted((a, b) => {
-    const [, , deg1, dist1] = a;
-    const [, , deg2, dist2] = b;
-
-    if (deg1 === deg2) {
-        return dist1 - dist2;
-    }
-    
-    if (deg2 > deg1) return -1;
-    if (deg2 < deg1) return 1;
-
-    // return dist1 * deg1 - dist2 * deg2;
-});
-*/
-
-/*
-let lastAngle = 0;
-for (let i = 1; i < sorted.length; i++) {
-    let [x, y, angle, distance] = sorted[i];
-    if (lastAngle >= angle) {
-        // Swap current item with the next one of different angle
-        const nextIndex = sorted.findIndex((aa, ii) =>  ii > i && aa[2] > angle);
-        if (nextIndex === -1) {
-            lastAngle = 0;
-            continue;
-        }
-        const tmp = sorted[nextIndex];
-        sorted[nextIndex] = sorted[i];
-        sorted[i] = tmp;
-        lastAngle = tmp[2];
-    } else {
-        lastAngle = angle;
-    }
-};
-*/
-
-
-console.log(`N:\tX,Y\tAngle\tDist`);
-sorted.map((a, i) => {
-    // console.log(a);
-    let [x, y, degrees, distance] = a;
-    console.log(`${i+1}:\t${y},${x}\t${degrees}\t${distance}`);
-});
+let [x, y] = sorted.at(199);
+console.log(`${y},${x}:\t${y * 100 + x}`);
