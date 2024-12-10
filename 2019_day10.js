@@ -180,33 +180,31 @@ const sortedInitial = unsorted.toSorted((a, b) => {
     return deg1 - deg2;    
 });
 
-const lastSorted = sortedInitial.at(-1);
 const sorted = [];
+let lastUnsorted = sortedInitial.at(-1);
 let lastAdded = sortedInitial.shift();
 sorted.push(lastAdded);
 let lastAngle = lastAdded.at(2);
-let ops = 1;
 
-while (sortedInitial.length && ops < unsorted.length) {
-    ops++;
-
+while (sorted.length < unsorted.length) {
     const nextIndex = sortedInitial.findIndex(
         ast => ast[2] > lastAdded[2]
     );
     if (nextIndex !== -1) {
         [lastAdded] = sortedInitial.splice(nextIndex, 1);
         sorted.push(lastAdded);
+        lastUnsorted = sortedInitial.at(-1);
         continue;
     }
 
-    // hmm, how to prevent infinite loops?
-    if (lastAdded[2] === lastSorted[2]) {
+    // Start next circle
+    if (lastAdded[2] >= lastUnsorted[2]) {
         lastAdded = sortedInitial.shift();
         sorted.push(lastAdded);
+        lastUnsorted = sortedInitial.at(-1);
         continue;
     }
 };
-
 
 // console.log(`N:\tX,Y\tAngle\tDist`);
 // sorted.map((a, i) => {
@@ -214,5 +212,8 @@ while (sortedInitial.length && ops < unsorted.length) {
 //     console.log(`${i+1}:\t${x},${y}\t${degrees}\t${distance}`);
 // });
 
-let [x, y] = sorted.at(199);
-console.log(`${y},${x}:\t${y * 100 + x}`);
+
+if (sorted.length >= 200) {
+    let [x, y] = sorted.at(199);
+    console.log(`${y},${x}:\t${y * 100 + x}`);
+}
