@@ -2,54 +2,10 @@
 
 import fs from 'node:fs/promises';
 
-const INPUT = await fs.readFile('./input/11.test2', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/11.txt', { encoding: 'utf8' });
 
 const DATA = INPUT.split(' ').map(Number);
 
-const INPUT_FILE = './output/in.txt';
-const OUTPUT_FILE = './output/out.txt';
-
-await fs.writeFile(INPUT_FILE, DATA.map(n => n.toString()).join('\n'));
-
-async function blink2(debug) {
-    const file = await fs.open(INPUT_FILE);
-    await fs.writeFile(OUTPUT_FILE, '');
-  
-    for await (let line of file.readLines()) {
-        if (line === '') continue;
-        if (line === '0') {
-            line = '1';
-        } else if (line.length % 2 === 0) {
-            let digits = line.split('');
-            let a = parseInt(digits.slice(0, digits.length / 2).join(''));
-            let b = parseInt(digits.slice(digits.length / 2, digits.length).join(''));
-            line = a.toString() + '\n' + b.toString();
-        } else {
-            line = (parseInt(line) * 2024).toString();
-        }
-
-        if (debug) {
-            console.log(`--- ${n}`);
-            console.log(line);
-        }
-
-        await fs.appendFile(OUTPUT_FILE, line + '\n')
-    }
-
-    await fs.copyFile(OUTPUT_FILE, INPUT_FILE);
-}
-
-// blink2();
-
-for (let i = 0; i < 75; i++) {
-    console.log(i);
-    await blink2();
-}
-
-
-
-
-// console.log( DATA.map(n => n.toString()).join(' ') ); // debug
 
 const blink = stones => stones.flatMap(n => {
     if (n === 0) return 1;
@@ -61,6 +17,9 @@ const blink = stones => stones.flatMap(n => {
     }
     return n * 2024;
 });
+
+
+
 /*
 let len = 0;
 function blink2(stones) {
@@ -84,8 +43,9 @@ function blink2(stones) {
 
     return stones;
 }
-    */
+*/
 
+/*
 function getLength(stones) {
     let len = 0;
     for (let i = 0; i < stones.length; i++) {
@@ -98,6 +58,20 @@ function getLength(stones) {
     }
     return len;
 }
+*/
+
+function countForks(n, cnt, depth) {
+    if (cnt === undefined) cnt = 0;
+    if (depth === undefined) depth = 1;
+    if (n === 0) return cnt + 1;
+    if (n.toString().length % 2 === 0) {
+        let digits = n.toString().split('');
+        let a = parseInt(digits.slice(0, digits.length / 2).join(''));
+        let b = parseInt(digits.slice(digits.length / 2, digits.length).join(''));
+        return [a, b];
+    }
+    return n * 2024;
+}
 
 
 // console.log( blink(DATA).map(n => n.toString()).join(' ') ); // debug
@@ -105,45 +79,43 @@ function getLength(stones) {
 // Part 1
 
 let stones = structuredClone(DATA);
-/*
+
 for (let i = 0; i < 25; i++) {
     stones = blink(stones);
 }
-
 console.log(stones.length);
+
+
+
 
 console.log('-----------------------------------');
 
+let memo = new Map();
 
-stones = structuredClone(DATA);
-*/
+let level2count = stones.reduce((acc, stone, i) => {
+    if (i % 100 === 0) console.log(i);
+    if (memo.has(stone)) return acc + memo.get(stone);
+    let level2stones = [stone];
+    for (let i = 0; i < 25; i++) {
+        level2stones = blink(level2stones);
+    }
+    memo.set(stone, level2stones.length);
 
-// for (let i = 0; i < 37; i++) {
-//     stones = blink2(stones);
-//     console.log(i);
-// }
+    let level3count = level2stones.reduce((acc, stone, i) => {
+        if (memo.has(stone)) return acc + memo.get(stone);
+        let level3stones = [stone];
+        for (let i = 0; i < 25; i++) {
+            level3stones = blink(level3stones);
+        }
+        memo.set(stone, level3stones.length);
+        return acc + level3stones.length;
+    }, 0);
 
-// for (let i = 0; i < 1; i++) {
-//     stones = blink2(stones);
-//     console.log(i);
-// }
-// console.log(getLength(stones));
+    return acc + level3count;
+    // return acc + level2stones.length;
+}, 0);
 
-// console.log(blink2(stones));
+console.log(level2count);
 
+// 112979377079  —  answer is too low
 
-/*
-On 38th iteration:
-
-<--- Last few GCs --->
-
-[96142:0x7facc2200000]    88597 ms: Mark-Compact 4052.9 (4139.2) -> 4041.0 (4143.0) MB, pooled: 0 MB, 1874.39 / 0.00 ms  (average mu = 0.170, current mu = 0.116) allocation failure; scavenge might not succeed
-[96142:0x7facc2200000]    92135 ms: Mark-Compact 4056.7 (4143.0) -> 4043.8 (4146.0) MB, pooled: 0 MB, 3506.49 / 0.00 ms  (average mu = 0.108, current mu = 0.009) allocation failure; scavenge might not succeed
-
-
-<--- JS stacktrace --->
-
-FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
------ Native stack trace -----
-...
-*/
