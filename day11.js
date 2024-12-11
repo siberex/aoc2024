@@ -19,67 +19,8 @@ const blink = stones => stones.flatMap(n => {
 });
 
 
-
-/*
-let len = 0;
-function blink2(stones) {
-    for (let i = 0; i < stones.length; i++) {
-        let n = stones[i];
-        if (Array.isArray(n)) {
-            n = blink2(n);
-        } else if (n === 0) {
-            n = 1;
-        } else if (n.toString().length % 2 === 0) {
-            let digits = n.toString().split('');
-            let a = parseInt(digits.slice(0, digits.length / 2).join(''));
-            let b = parseInt(digits.slice(digits.length / 2, digits.length).join(''));
-            n = [a, b];
-        } else {
-            n = n * 2024;
-        }
-
-        stones[i] = n;
-    }
-
-    return stones;
-}
-*/
-
-/*
-function getLength(stones) {
-    let len = 0;
-    for (let i = 0; i < stones.length; i++) {
-        let n = stones[i];
-        if (Array.isArray(n)) {
-            len += getLength(n);
-        } else {
-            len += 1;
-        }
-    }
-    return len;
-}
-*/
-
-function countForks(n, cnt, depth) {
-    if (cnt === undefined) cnt = 0;
-    if (depth === undefined) depth = 1;
-    if (n === 0) return cnt + 1;
-    if (n.toString().length % 2 === 0) {
-        let digits = n.toString().split('');
-        let a = parseInt(digits.slice(0, digits.length / 2).join(''));
-        let b = parseInt(digits.slice(digits.length / 2, digits.length).join(''));
-        return [a, b];
-    }
-    return n * 2024;
-}
-
-
-// console.log( blink(DATA).map(n => n.toString()).join(' ') ); // debug
-
 // Part 1
-
 let stones = structuredClone(DATA);
-
 for (let i = 0; i < 25; i++) {
     stones = blink(stones);
 }
