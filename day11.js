@@ -2,10 +2,52 @@
 
 import fs from 'node:fs/promises';
 
-const INPUT = await fs.readFile('./input/11.txt', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/11.test2', { encoding: 'utf8' });
 
 const DATA = INPUT.split(' ').map(Number);
-const WIDTH = DATA.length;
+
+const INPUT_FILE = './output/in.txt';
+const OUTPUT_FILE = './output/out.txt';
+
+await fs.writeFile(INPUT_FILE, DATA.map(n => n.toString()).join('\n'));
+
+async function blink2(debug) {
+    const file = await fs.open(INPUT_FILE);
+    await fs.writeFile(OUTPUT_FILE, '');
+  
+    for await (let line of file.readLines()) {
+        if (line === '') continue;
+        if (line === '0') {
+            line = '1';
+        } else if (line.length % 2 === 0) {
+            let digits = line.split('');
+            let a = parseInt(digits.slice(0, digits.length / 2).join(''));
+            let b = parseInt(digits.slice(digits.length / 2, digits.length).join(''));
+            line = a.toString() + '\n' + b.toString();
+        } else {
+            line = (parseInt(line) * 2024).toString();
+        }
+
+        if (debug) {
+            console.log(`--- ${n}`);
+            console.log(line);
+        }
+
+        await fs.appendFile(OUTPUT_FILE, line + '\n')
+    }
+
+    await fs.copyFile(OUTPUT_FILE, INPUT_FILE);
+}
+
+// blink2();
+
+for (let i = 0; i < 75; i++) {
+    console.log(i);
+    await blink2();
+}
+
+
+
 
 // console.log( DATA.map(n => n.toString()).join(' ') ); // debug
 
@@ -19,7 +61,7 @@ const blink = stones => stones.flatMap(n => {
     }
     return n * 2024;
 });
-
+/*
 let len = 0;
 function blink2(stones) {
     for (let i = 0; i < stones.length; i++) {
@@ -42,6 +84,7 @@ function blink2(stones) {
 
     return stones;
 }
+    */
 
 function getLength(stones) {
     let len = 0;
@@ -80,11 +123,11 @@ stones = structuredClone(DATA);
 //     console.log(i);
 // }
 
-for (let i = 0; i < 75; i++) {
-    stones = blink2(stones);
-    console.log(i);
-}
-console.log(getLength(stones));
+// for (let i = 0; i < 1; i++) {
+//     stones = blink2(stones);
+//     console.log(i);
+// }
+// console.log(getLength(stones));
 
 // console.log(blink2(stones));
 
