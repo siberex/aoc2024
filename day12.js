@@ -2,7 +2,7 @@
 
 import fs from 'node:fs/promises';
 
-const INPUT = await fs.readFile('./input/12.txt', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/12.test', { encoding: 'utf8' });
 
 const DATA = INPUT.split('\n').map(row => row.split(''));
 
@@ -17,7 +17,7 @@ const regionIdsPlants = new Map();
 const regionMap = Array(WIDTH).fill(null, 0, WIDTH).map(v => Array(HEIGHT).fill(null, 0, HEIGHT));
 
 
-function getUnmappedNeibhouring(DATA, regionMap, plant, x, y) {
+function getUnmappedNeighbouring(DATA, regionMap, plant, x, y) {
     let result = [];
     if (!isOutOfBounds(x - 1, y) && regionMap[x - 1][y] === null && DATA[x - 1][y] === plant) result.push([x - 1, y]);
     if (!isOutOfBounds(x + 1, y) && regionMap[x + 1][y] === null && DATA[x + 1][y] === plant) result.push([x + 1, y]);
@@ -36,19 +36,15 @@ function countFences(regionMap, rId, x, y) {
     return result;
 }
 
-
-
 // console.log(DATA);
 
+// Fill region map with distinct ids instead of letters
 let regionId = 0;
-let x = 0, y = 0;
-
-
 function fill(x, y, regionId) {
     const plant = DATA[x][y];
     regionMap[x][y] = regionId;
-    let neigbours = getUnmappedNeibhouring(DATA, regionMap, plant, x, y);
-    neigbours.forEach(xy => {
+    let neighbouringCells = getUnmappedNeighbouring(DATA, regionMap, plant, x, y);
+    neighbouringCells.forEach(xy => {
         const [nx, ny] = xy;
         regionMap[nx][ny] = regionId;
         fill(nx, ny, regionId);
@@ -63,7 +59,7 @@ for (let x = 0; x < WIDTH; x++) {
     }
 }
 console.log(`regions count: ${regionId}`);
-// console.log(regionMap);
+console.log(regionMap.map(r => r.join('')).join('\n')); // debug
 
 for (let x = 0; x < WIDTH; x++) {
     for (let y = 0; y < HEIGHT; y++) {
@@ -80,6 +76,8 @@ for (let x = 0; x < WIDTH; x++) {
 
 // console.log(regionCoords);
 
+const areas = new Map();
+
 let totalPrice = 0;
 regionCoords.forEach((coords, rId) => {
     const area = coords.length;
@@ -88,54 +86,69 @@ regionCoords.forEach((coords, rId) => {
         return acc + countFences(regionMap, rId, x, y);
     }, 0);
     totalPrice += area * fence;
+    areas.set(rId, area);
 
-    const plant = regionIdsPlants.get(rId);
-    console.log(`region ${plant}: ${area} * ${fence} = ${area * fence}`);
+    // const plant = regionIdsPlants.get(rId);
+    // console.log(`region ${plant}: ${area} * ${fence} = ${area * fence}`);
 });
 
+// Part 1
 console.log(totalPrice);
 
 
 
 
-/*
-for (let x = 0; x < WIDTH; x++) {
-    for (let y = 0; y < HEIGHT; y++) {
+const straightFences = new Map();
 
-        if (regionMap[i][j] !== null) continue;
-        
-        let plant = DATA[x][y];
-        
-        let sqRadius = 1;
-        let xFrom, xTo, yFrom, yTo;
-
-        while (sqRadius < WIDTH) {
-            xFrom = x - sqRadius;
-            xTo = x + sqRadius;
-            yFrom = y - sqRadius;
-            yTo = y + sqRadius;
-            outer: for (let i = xFrom; i <= xTo; i++) {
-                for (let j = yFrom; j <= yTo; j++) {
-                    // Limit iterations to square borders
-                    if (i !== xFrom && i !== xTo && j !== yFrom && j !== yTo) continue;
-                    // Skip out of bounds coords
-                    if (isOutOfBounds(i, j)) continue;
-                    if (DATA[i][j] !== plant) break;
-        
-                    regionMap[i, j] = regionId;
-                }
-            }
-            sqRadius++;
-        }
-
-        regionId++;
+regionCoords.forEach((coords, rId) => {
+    if (areas.get(rId) === 1) {
+        straightFences.set(rId, 4);
+        return;
     }
-}
-*/
+
+    const bbox = coords.reduce((box, xy) => {
+        const [x, y] = xy;
+        if (x < box.xmin) box.xmin = x;
+        if (x > box.xmax) box.xmax = x;
+        if (y < box.ymin) box.ymin = y;
+        if (y > box.ymax) box.ymax = y;
+        return box;
+    }, {xmin: WIDTH, xmax: 0, ymin: HEIGHT, ymax: 0});
+
+    // console.log(rId, bbox); // debug
+
+    // "Vertical" swipe
+    for (let i = bbox.xmin; i <= bbox.xmax; i++) {
+
+        let continuous = true;
+        let lineHoles = 0;
+        let edgesTop = 0;
+        let edgesBottom = 0;
+
+        const fromY = regionMap[i].findIndex(id => id === rId);
+        const toY = regionMap[i].findLastIndex(id => id === rId);
+
+        for (let j = fromY; j <= toY; j++) {
+
+            if (regionMap[i][j] !== rId) {
+                lineHoles++;
+                continue;
+            }
 
 
+        }
+    }
+});
 
 
+// const rId = 0;
+// console.log(regionCoords.get(rId));
+
+// const coords = regionCoords.get(rId);
+// const startingPos = coords[0];
+
+// let pos = coords[0];
+// let [x, y] = pos;
 
 // while (!isOutOfBounds(i, j) && regionMap[i][j] === null) {
     
