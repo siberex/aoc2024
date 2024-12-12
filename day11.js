@@ -2,12 +2,12 @@
 
 import fs from 'node:fs/promises';
 
-const INPUT = await fs.readFile('./input/11.txt', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/11.test2', { encoding: 'utf8' });
 
 const DATA = INPUT.split(' ').map(Number);
 
 
-const blink = stones => stones.flatMap(n => {
+const blink = n => {
     if (n === 0) return 1;
     if (n.toString().length % 2 === 0) {
         let digits = n.toString().split('');
@@ -16,40 +16,67 @@ const blink = stones => stones.flatMap(n => {
         return [a, b];
     }
     return n * 2024;
-});
+}
+
+const MEMO = new Map();
+const blinkMemo = n => {
+    if (MEMO.has(n)) return MEMO.get(n);
+    const result = blink(n);
+    MEMO.set(n, result);
+    return result;
+}
+
+// const blinkList = stones => stones.flatMap(blinkMemo);
+
+const MEMO_CNT = new Map();
 
 
 // Part 1
 let stones = structuredClone(DATA);
-for (let i = 0; i < 25; i++) {
-    stones = blink(stones);
-}
+for (let i = 0; i < 25; i++) stones = stones.flatMap(blinkMemo);
 console.log(stones.length);
-
-
-
 
 console.log('-----------------------------------');
 
-let memo = new Map();
+stones = structuredClone(DATA);
 
-let level2count = stones.reduce((acc, stone, i) => {
-    if (i % 100 === 0) console.log(i);
+
+
+
+
+
+/*
+const level1count = DATA.reduce((acc, stone, i) => {
     if (memo.has(stone)) return acc + memo.get(stone);
+    let stones = [stone];
+    for (let i = 0; i < 25; i++) {
+        stones = blink(stones);
+    }
+    memo.set(stone, stones.length);
+    return acc + stones.length;
+}, 0);
+console.log(level1count);
+console.log('-----------------------------------');
+
+let level2count = DATA.reduce((acc, stone, i) => {
+    if (i % 100 === 0) console.log(i); // debug
+
+    // if (memo.has(stone)) return acc + memo.get(stone);
     let level2stones = [stone];
     for (let i = 0; i < 25; i++) {
         level2stones = blink(level2stones);
     }
-    memo.set(stone, level2stones.length);
+    if (!memo.has(stone))
+        memo.set(stone, level2stones.length);
 
-    let level3count = level2stones.reduce((acc, stone, i) => {
-        if (memo.has(stone)) return acc + memo.get(stone);
-        let level3stones = [stone];
+    let level3count = level2stones.reduce((cnt, st) => {
+        if (memo.has(st)) return cnt + memo.get(st);
+        let level3stones = [st];
         for (let i = 0; i < 25; i++) {
             level3stones = blink(level3stones);
         }
-        memo.set(stone, level3stones.length);
-        return acc + level3stones.length;
+        memo.set(st, level3stones.length);
+        return cnt + level3stones.length;
     }, 0);
 
     return acc + level3count;
@@ -57,6 +84,16 @@ let level2count = stones.reduce((acc, stone, i) => {
 }, 0);
 
 console.log(level2count);
+*/
+
+
+
 
 // 112979377079  —  answer is too low
+// 432369688950  —  answer is too low
+// 7581573131 ×
 
+// Test data shoule be: 65601038650482
+//            I've got: 3461232181
+//                    : 3433074592 - even more wrong
+//                    : 71602155920
