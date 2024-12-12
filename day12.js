@@ -2,7 +2,7 @@
 
 import fs from 'node:fs/promises';
 
-const INPUT = await fs.readFile('./input/12.test', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/12.txt', { encoding: 'utf8' });
 
 const DATA = INPUT.split('\n').map(row => row.split(''));
 
@@ -11,7 +11,8 @@ const HEIGHT = DATA[0]?.length;
 
 const isOutOfBounds = (x, y) => x < 0 || y < 0 || x > WIDTH - 1 || y > HEIGHT - 1;
 
-const regionCoords = [];
+const regionCoords = new Map();
+const regionIdsPlants = new Map();
 
 const regionMap = Array(WIDTH).fill(null, 0, WIDTH).map(v => Array(HEIGHT).fill(null, 0, HEIGHT));
 
@@ -25,9 +26,19 @@ function getUnmappedNeibhouring(DATA, regionMap, plant, x, y) {
     return result;
 }
 
+function countFences(regionMap, rId, x, y) {
+    // const rId = regionMap[x][y];
+    let result = 0;
+    if (isOutOfBounds(x - 1, y) || regionMap[x - 1][y] !== rId) result++;
+    if (isOutOfBounds(x + 1, y) || regionMap[x + 1][y] !== rId) result++;
+    if (isOutOfBounds(x, y - 1) || regionMap[x][y - 1] !== rId) result++;
+    if (isOutOfBounds(x, y + 1) || regionMap[x][y + 1] !== rId) result++;
+    return result;
+}
 
 
-console.log(DATA);
+
+// console.log(DATA);
 
 let regionId = 0;
 let x = 0, y = 0;
@@ -51,8 +62,41 @@ for (let x = 0; x < WIDTH; x++) {
         regionId++;
     }
 }
-
 console.log(`regions count: ${regionId}`);
+// console.log(regionMap);
+
+for (let x = 0; x < WIDTH; x++) {
+    for (let y = 0; y < HEIGHT; y++) {
+        const rId = regionMap[x][y];
+        const coords = regionCoords.get(rId);
+        if (coords === undefined) {
+            regionIdsPlants.set(rId, DATA[x][y]);
+            regionCoords.set(rId, [[x, y]]);
+        } else {
+            coords.push([x, y]);
+        }
+    }
+}
+
+// console.log(regionCoords);
+
+let totalPrice = 0;
+regionCoords.forEach((coords, rId) => {
+    const area = coords.length;
+    const fence = coords.reduce((acc, xy) => {
+        const [x, y] = xy;
+        return acc + countFences(regionMap, rId, x, y);
+    }, 0);
+    totalPrice += area * fence;
+
+    const plant = regionIdsPlants.get(rId);
+    console.log(`region ${plant}: ${area} * ${fence} = ${area * fence}`);
+});
+
+console.log(totalPrice);
+
+
+
 
 /*
 for (let x = 0; x < WIDTH; x++) {
@@ -89,7 +133,7 @@ for (let x = 0; x < WIDTH; x++) {
 }
 */
 
-console.log(regionMap);
+
 
 
 
