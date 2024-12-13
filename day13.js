@@ -45,15 +45,18 @@ const wins = MACHINES.map(machine => {
     const {ax, ay, bx, by, px, py} = machine;
     const bCnt = (py/ay - px/ax) / (-bx/ax + by/ay);
     const aCnt = (px - bx * bCnt) / ax;
+    const aCnt2 = (py - by * bCnt) / ay;
 
     const aaCnt = (py/by - px/bx) / (-ax/bx + ay/by);
     const bbCnt = (px - ax * aaCnt) / bx;
-    // const bbCnt2 = (py - ay * aaCnt) / by;
+    const bbCnt2 = (py - ay * aaCnt) / by;
 
-    if (bbCnt === Math.round(bbCnt)
-         || aaCnt === Math.round(aaCnt)
-         || aCnt === Math.round(aCnt)
-         || bCnt === Math.round(bCnt)
+    if (    bbCnt == Math.round(bbCnt)
+         || aaCnt == Math.round(aaCnt)
+         || bbCnt2 == Math.round(bbCnt2)
+         || aCnt == Math.round(aCnt)
+         || bCnt == Math.round(bCnt)
+         || aCnt2 == Math.round(aCnt2)
         ) {
 
         // return [Math.round(aaCnt), Math.round(bbCnt)];
@@ -71,10 +74,12 @@ console.log(wins.reduce((acc, v)=>acc+v, 0));
 
 // 27092 — not the right answer
 // 34786 - answer is too low
+// 36598 - answer is too low
 
 
 // N = (py/bx - px/ax) / (-bx/ax + by/ay)
 // M = (px - bx * N) / ax
+// M = (py - by * N) / ay
 
 // No more than 100 times to win a prize
 // M * costA * ax + N * costB * bx === px
