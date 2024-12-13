@@ -26,6 +26,7 @@ const MACHINES = DATA.map(m => {
 console.log(`Total machines: ${MACHINES.length}`);
 // console.log(MACHINES); // debug
 
+/*
 const wins = MACHINES.map(machine => {
     const {ax, ay, bx, by, px, py} = machine;
     const bCnt = (py/ay - px/ax) / (-bx/ax + by/ay);
@@ -38,8 +39,38 @@ const wins = MACHINES.map(machine => {
 }).filter(win => win !== -1);
 
 console.log(wins.reduce((acc, v)=>acc+v, 0));
+*/
+
+const wins = MACHINES.map(machine => {
+    const {ax, ay, bx, by, px, py} = machine;
+    const bCnt = (py/ay - px/ax) / (-bx/ax + by/ay);
+    const aCnt = (px - bx * bCnt) / ax;
+
+    const aaCnt = (py/by - px/bx) / (-ax/bx + ay/by);
+    const bbCnt = (px - ax * aaCnt) / bx;
+    // const bbCnt2 = (py - ay * aaCnt) / by;
+
+    if (bbCnt === Math.round(bbCnt)
+         || aaCnt === Math.round(aaCnt)
+         || aCnt === Math.round(aCnt)
+         || bCnt === Math.round(bCnt)
+        ) {
+
+        // return [Math.round(aaCnt), Math.round(bbCnt)];
+        return Math.round(bbCnt) * costB + Math.round(aaCnt) * costA;
+    } else {
+        // return [aaCnt, bbCnt];
+        return -1;
+    };
+}).filter(win => win !== -1);
+
+// console.log(wins)
+
+console.log(wins.reduce((acc, v)=>acc+v, 0));
+
 
 // 27092 — not the right answer
+// 34786 - answer is too low
 
 
 // N = (py/bx - px/ax) / (-bx/ax + by/ay)
@@ -65,6 +96,9 @@ console.log(wins.reduce((acc, v)=>acc+v, 0));
 // N = (5400/34 - 8400/94) / (-22/94 + 67/34)
 // N = 40
 
-// a) 
-// b)
-
+// a) N = (8400 - 94*M) / 22
+// b) N = (5400 - 34*M) / 67
+// 8400/22 - 94/22*M === 5400/67 - 34/67*M
+// -94/22*M + 34/67*M === 5400/67 - 8400/22
+// M = (5400/67 - 8400/22) / (-94/22 + 34/67)
+// M = 80
