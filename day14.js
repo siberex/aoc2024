@@ -2,7 +2,7 @@
 
 import fs from 'node:fs/promises';
 
-const INPUT = await fs.readFile('./input/14.test', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/14.txt', { encoding: 'utf8' });
 
 let WIDTH = 0;
 let HEIGHT = 0;
@@ -29,12 +29,13 @@ let DATA = INPUT.split('\n').map(line => {
     };
 });
 
-DATA = [{p: [2,4], v:[2,-3]}];
+// DATA = [{p: [2,4], v:[2,-3]}];
+// DATA = [{p: [0,0], v:[-5,1]}];
 
 // console.log (WIDTH, HEIGHT);
 // console.log(DATA); // debug
 
-function getMap(coords) {
+function printMap(coords) {
     const rMap = Array(HEIGHT).fill(null, 0, HEIGHT).map(v => Array(WIDTH).fill('.', 0, WIDTH));
 
     coords.forEach(xy => {
@@ -46,15 +47,33 @@ function getMap(coords) {
     return rMap.map(r => r.join('')).join('\n');
 }
 
-console.log(getMap(DATA.map(r => r.p)));
+function getSafetyFactor(coords) {
+    let q1 = 0, q2 = 0, q3 = 0, q4 = 0;
+    
+    coords.forEach(xy => {
+        const [x, y] = xy;
+        if (x > (WIDTH-1) / 2 && y < (HEIGHT-1) / 2) q1++;
+        if (x < (WIDTH-1) / 2 && y < (HEIGHT-1) / 2) q2++;
+        if (x < (WIDTH-1) / 2 && y > (HEIGHT-1) / 2) q3++;
+        if (x > (WIDTH-1) / 2 && y > (HEIGHT-1) / 2) q4++;
+    });
+
+    // console.log(q1 , q2 , q3 , q4);
+
+    return q1 * q2 * q3 * q4;
+}
 
 
-const seconds = 5;
+
+console.log(printMap(DATA.map(r => r.p)));
+
+
+const seconds = 100;
 let newState = DATA.map(r => {
     const {p, v} = r;
 
-    let x = (p[0] + v[0] * seconds) % WIDTH;
-    let y = (p[1] + p[1] * seconds) % HEIGHT;
+    let x = v[0] === 0 ? p[0] : (p[0] + v[0] * seconds) % WIDTH;
+    let y = v[1] === 0 ? p[1] : (p[1] + v[1] * seconds) % HEIGHT;
 
     if (x < 0) x = WIDTH + x;
     if (y < 0) y = HEIGHT + y;
@@ -62,7 +81,15 @@ let newState = DATA.map(r => {
     return [x, y];
 });
 
+// console.log('————————————————————————————');
 // console.log(newState);
+// console.log((WIDTH-1) / 2, (HEIGHT-1) / 2)
+// console.log(newState.filter(xy => {
+//     const [x, y] = xy;
+//     return (x > (WIDTH-1) / 2 && y < (HEIGHT-1) / 2);
+// }));
 
 console.log('————————————————————————————');
-console.log(getMap(newState));
+console.log(printMap(newState));
+console.log(getSafetyFactor(newState));
+
