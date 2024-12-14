@@ -35,25 +35,24 @@ const SEPARATOR = '—'.repeat(WIDTH)
 
 const getStateTransformer = seconds => robot => {
     const {p, v} = robot;
+    let [x, y] = p;
+    let [dx, dy] = v;
 
-    let x = v[0] === 0 ? p[0] : (p[0] + v[0] * seconds) % WIDTH;
-    let y = v[1] === 0 ? p[1] : (p[1] + v[1] * seconds) % HEIGHT;
+    x = (x + dx * seconds) % WIDTH;
+    y = (y + dy * seconds) % HEIGHT;
 
-    if (x < 0) x = WIDTH + x;
-    if (y < 0) y = HEIGHT + y;
+    // Negative runout
+    if (x < 0) x += WIDTH;
+    if (y < 0) y += HEIGHT;
 
-    return {
-        p: [x, y], 
-        v
-    };
+    return {p: [x, y], v};
 }
 
 const getMap = coords => {
     const map = Array(HEIGHT).fill(null, 0, HEIGHT).map(v => Array(WIDTH).fill(0, 0, WIDTH));
     coords.forEach(r => {
         const [x, y] = r.p;
-        if (map[y][x] === 0) map[y][x] = 1;
-        else map[y][x] += 1;
+        map[y][x] += 1;
     });
     return map;
 }
