@@ -136,7 +136,7 @@ regionCoords.forEach((coords, rId) => {
         const toY = row.findLastIndex(id => id === rId);
 
         const topEdges = row.filter((id, j) => {
-            if (j < fromY || j > toY) return false;
+            if (j < fromY || j > toY) return false; // premature optimization, could be removed
             if (id !== rId) return false;
             if (isOutOfBounds(i - 1, j) || regionMap[i - 1][j] !== rId) return true;
         });
@@ -147,9 +147,11 @@ regionCoords.forEach((coords, rId) => {
             if (id !== rId) return false;
             if (isOutOfBounds(i + 1, j) || regionMap[i + 1][j] !== rId) return true;
         });
+        // bug is here
         const bCnt = bottomEdges.flatMap(removeConsecutiveRepititions).filter(id => id === rId).length;
 
         console.log(`↓↓↓ ${regionIdsPlants.get(rId)}:`, row, tCnt, bCnt); // debug
+        console.log(bottomEdges);
         topEdgesCount += tCnt;
         bottomEdgesCount += bCnt;
     }

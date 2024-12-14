@@ -2,7 +2,7 @@
 
 import fs from 'node:fs/promises';
 
-const INPUT = await fs.readFile('./input/14.txt', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/14.test', { encoding: 'utf8' });
 
 let WIDTH = 0;
 let HEIGHT = 0;
@@ -35,16 +35,19 @@ let DATA = INPUT.split('\n').map(line => {
 // console.log (WIDTH, HEIGHT);
 // console.log(DATA); // debug
 
-function printMap(coords) {
-    const rMap = Array(HEIGHT).fill(null, 0, HEIGHT).map(v => Array(WIDTH).fill('.', 0, WIDTH));
-
+function getMap(coords) {
+    const map = Array(HEIGHT).fill(null, 0, HEIGHT).map(v => Array(WIDTH).fill(0, 0, WIDTH));
     coords.forEach(r => {
         const [x, y] = r.p;
-        if (rMap[y][x] === '.') rMap[y][x] = 1;
-        else rMap[y][x] += 1;
+        if (map[y][x] === 0) map[y][x] = 1;
+        else map[y][x] += 1;
     });
-
-    return rMap.map(r => r.join('')).join('\n');
+    return map;
+}
+function printMap(coords) {
+    return getMap(coords).map(
+        r => r.map(v => v ? v.toString() : '.').join('')
+    ).join('\n');
 }
 
 function getSafetyFactor(coords) {
@@ -93,7 +96,7 @@ let newState = DATA.map(r => {
 // }));
 
 console.log('————————————————————————————');
-console.log(printMap(newState));
+// console.log(printMap(newState));
 console.log(getSafetyFactor(newState));
 
 
@@ -101,18 +104,23 @@ console.log(getSafetyFactor(newState));
 
 function isChrismasTree(coords) {
     let q1 = 0, q2 = 0, q3 = 0, q4 = 0;
-    
+
+    const map = getMap(coords);
+
+    const midX = (WIDTH - 1) / 2;
+
+
     coords.forEach(r => {
         const [x, y] = r.p;
-        if (x > (WIDTH-1) / 2 && y < (HEIGHT-1) / 2) q1++;
-        if (x < (WIDTH-1) / 2 && y < (HEIGHT-1) / 2) q2++;
-        if (x < (WIDTH-1) / 2 && y > (HEIGHT-1) / 2) q3++;
-        if (x > (WIDTH-1) / 2 && y > (HEIGHT-1) / 2) q4++;
+        if (x > midX && y < (HEIGHT-1) / 2) q1++;
+        if (x < midX && y < (HEIGHT-1) / 2) q2++;
+        if (x < midX && y > (HEIGHT-1) / 2) q3++;
+        if (x > midX && y > (HEIGHT-1) / 2) q4++;
     });
 
     // console.log(q1 , q2 , q3 , q4);
 
-    return q2 * q3 === q1 * q4;
+    return (q2 * q3 === q1 * q4) && (q2 + q3 === q1 + q4);
 }
 
 let step = robot => {
