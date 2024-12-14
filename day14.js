@@ -2,7 +2,7 @@
 
 import fs from 'node:fs/promises';
 
-const INPUT = await fs.readFile('./input/14.test', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/14.txt', { encoding: 'utf8' });
 
 let WIDTH = 0;
 let HEIGHT = 0;
@@ -53,12 +53,15 @@ function printMap(coords) {
 function getSafetyFactor(coords) {
     let q1 = 0, q2 = 0, q3 = 0, q4 = 0;
     
+    const midX = (WIDTH - 1) / 2;
+    const midY = (HEIGHT - 1) / 2;
+
     coords.forEach(r => {
         const [x, y] = r.p;
-        if (x > (WIDTH-1) / 2 && y < (HEIGHT-1) / 2) q1++;
-        if (x < (WIDTH-1) / 2 && y < (HEIGHT-1) / 2) q2++;
-        if (x < (WIDTH-1) / 2 && y > (HEIGHT-1) / 2) q3++;
-        if (x > (WIDTH-1) / 2 && y > (HEIGHT-1) / 2) q4++;
+        if (x > midX && y < midY) q1++;
+        if (x < midX && y < midY) q2++;
+        if (x < midX && y > midY) q3++;
+        if (x > midX && y > midY) q4++;
     });
 
     // console.log(q1 , q2 , q3 , q4);
@@ -100,29 +103,41 @@ console.log('——————————————————————�
 console.log(getSafetyFactor(newState));
 
 
-
-
+// Search for 10+ robots in a row
 function isChrismasTree(coords) {
-    let q1 = 0, q2 = 0, q3 = 0, q4 = 0;
-
-    const map = getMap(coords);
+    const mapStr = getMap(coords).map(
+        r => r.map(v => (v && v === 1) ? v.toString() : '.').join('')
+    ).join('\n');
+    return /1{10}/.test(mapStr);
+}
+/*
+function isChrismasTree(coords) {
+    // Array of [0 .. HEIGHT - 1][0 .. WIDTH - 1]
+    // const map = getMap(coords);
 
     const midX = (WIDTH - 1) / 2;
-
-
-    coords.forEach(r => {
+    const midY = (HEIGHT - 1) / 2;
+    for (let i = 0; i < coords.length; i++) {
+        const r = coords[i];
         const [x, y] = r.p;
-        if (x > midX && y < (HEIGHT-1) / 2) q1++;
-        if (x < midX && y < (HEIGHT-1) / 2) q2++;
-        if (x < midX && y > (HEIGHT-1) / 2) q3++;
-        if (x > midX && y > (HEIGHT-1) / 2) q4++;
-    });
+        // console.log(x, WIDTH - x - 1, WIDTH);
+        
+        // skip middle line
+        if (x < midX) {
+            // if (map[y][WIDTH - x - 1] !== map[y][x]) return false;
+            // if ( !coords.some( robot => robot.p[0] === WIDTH - x - 1 ) ) return false;
+        }
+        if (x > midX) {
+            // if (map[y][WIDTH - x - 1] !== map[y][x]) return false;
+            // if ( !coords.some( robot => robot.p[0] === WIDTH - x - 1 ) ) return false;
+        }
+    };
 
-    // console.log(q1 , q2 , q3 , q4);
-
-    return (q2 * q3 === q1 * q4) && (q2 + q3 === q1 + q4);
+    return true;
 }
+*/
 
+// let step = (robot, seconds) => robot => {
 let step = robot => {
     const {p, v} = robot;
 
@@ -140,7 +155,7 @@ let step = robot => {
 
 let nextState = DATA.map(step);
 let stepCnt = 1;
-while (!isChrismasTree(nextState)) {
+while (!isChrismasTree(nextState) && stepCnt < 10000) {
     nextState = nextState.map(step);
     stepCnt++;
 }
