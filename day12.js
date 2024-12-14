@@ -2,7 +2,7 @@
 
 import fs from 'node:fs/promises';
 
-const INPUT = await fs.readFile('./input/12.test', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/12.test1', { encoding: 'utf8' });
 
 const DATA = INPUT.split('\n').map(row => row.split(''));
 
@@ -36,7 +36,14 @@ function countFences(regionMap, rId, x, y) {
     return result;
 }
 
-// console.log(DATA);
+const removeConsecutiveRepititions = (id, i, arr) => {
+    if (arr.at(i - 1) === undefined) return [id];
+    if (arr[i - 1] === arr[i]) return [];
+    return [id];
+};
+
+
+console.log(DATA.map(r => r.join('')).join('\n'));
 
 // Fill region map with distinct ids instead of letters
 let regionId = 0;
@@ -58,8 +65,8 @@ for (let x = 0; x < WIDTH; x++) {
         regionId++;
     }
 }
-console.log(`regions count: ${regionId}`);
-console.log(regionMap.map(r => r.join('')).join('\n')); // debug
+console.log(`Regions count: ${regionId}`);
+// console.log(regionMap.map(r => r.join('')).join('\n')); // debug
 
 for (let x = 0; x < WIDTH; x++) {
     for (let y = 0; y < HEIGHT; y++) {
@@ -74,10 +81,11 @@ for (let x = 0; x < WIDTH; x++) {
     }
 }
 
-// console.log(regionCoords);
+// console.log(regionCoords); // Debug
 
-const areas = new Map();
 
+// Part 1
+const areas = new Map(); // Used in Part 2
 let totalPrice = 0;
 regionCoords.forEach((coords, rId) => {
     const area = coords.length;
@@ -86,18 +94,19 @@ regionCoords.forEach((coords, rId) => {
         return acc + countFences(regionMap, rId, x, y);
     }, 0);
     totalPrice += area * fence;
-    areas.set(rId, area);
+    areas.set(rId, area); // Used in Part 2
 
+    // Pretty print:
     // const plant = regionIdsPlants.get(rId);
     // console.log(`region ${plant}: ${area} * ${fence} = ${area * fence}`);
 });
 
-// Part 1
 console.log(totalPrice);
 
 
 
-
+// Part 2
+totalPrice = 0;
 const straightFences = new Map();
 
 regionCoords.forEach((coords, rId) => {
@@ -115,43 +124,71 @@ regionCoords.forEach((coords, rId) => {
         return box;
     }, {xmin: WIDTH, xmax: 0, ymin: HEIGHT, ymax: 0});
 
-    // console.log(rId, bbox); // debug
+    console.log(regionIdsPlants.get(rId), bbox); // debug
 
-    // "Vertical" swipe
+    let topEdgesCount = 0, bottomEdgesCount = 0, leftEdgesCount = 0, rightEdgesCount = 0;
+
+    // "Vertical" swipe from top to bottom to find horizontal edges
     for (let i = bbox.xmin; i <= bbox.xmax; i++) {
+        const row = regionMap[i];
+        const fromY = row.findIndex(id => id === rId);
+        if (fromY === -1) continue;
+        const toY = row.findLastIndex(id => id === rId);
 
-        let continuous = true;
-        let lineHoles = 0;
-        let edgesTop = 0;
-        let edgesBottom = 0;
+        const topEdges = row.filter((id, j) => {
+            if (j < fromY || j > toY) return false;
+            if (id !== rId) return false;
+            if (isOutOfBounds(i - 1, j) || regionMap[i - 1][j] !== rId) return true;
+        });
+        const tCnt = topEdges.flatMap(removeConsecutiveRepititions).filter(id => id === rId).length;
 
-        const fromY = regionMap[i].findIndex(id => id === rId);
-        const toY = regionMap[i].findLastIndex(id => id === rId);
+        const bottomEdges = row.filter((id, j) => {
+            if (j < fromY || j > toY) return false;
+            if (id !== rId) return false;
+            if (isOutOfBounds(i + 1, j) || regionMap[i + 1][j] !== rId) return true;
+        });
+        const bCnt = bottomEdges.flatMap(removeConsecutiveRepititions).filter(id => id === rId).length;
 
-        for (let j = fromY; j <= toY; j++) {
-
-            if (regionMap[i][j] !== rId) {
-                lineHoles++;
-                continue;
-            }
-
-
-        }
+        console.log(`↓↓↓ ${regionIdsPlants.get(rId)}:`, row, tCnt, bCnt); // debug
+        topEdgesCount += tCnt;
+        bottomEdgesCount += bCnt;
     }
+
+    // "Horizontal" swipe from left to right to find vertical edges
+    for (let j = bbox.ymin; j <= bbox.ymax; j++) {
+        const column = regionMap.map(row => row.at(j));
+        // console.log(column);
+        
+        const fromX = column.findIndex(id => id === rId);
+        if (fromX === -1) continue;
+        const toX = column.findLastIndex(id => id === rId);
+
+        const leftEdges = column.filter((id, i) => {
+            if (i < fromX || i > toX) return false;
+            if (id !== rId) return false;
+            if (isOutOfBounds(i, j - 1) || regionMap[i][j - 1] !== rId) return true;
+        });
+        const lCnt = leftEdges.flatMap(removeConsecutiveRepititions).filter(id => id === rId).length;
+
+        const rigthEdges = column.filter((id, i) => {
+            if (i < fromX || i > toX) return false;
+            if (id !== rId) return false;
+            if (isOutOfBounds(i, j + 1) || regionMap[i][j + 1] !== rId) return true;
+        });
+        const rCnt = rigthEdges.flatMap(removeConsecutiveRepititions).filter(id => id === rId).length;
+
+        console.log(`→ ${regionIdsPlants.get(rId)}:`, column, lCnt, rCnt); // debug
+
+        leftEdgesCount += lCnt;
+        rightEdgesCount += rCnt;
+    }
+
+    console.log('#', regionIdsPlants.get(rId), topEdgesCount + bottomEdgesCount + leftEdgesCount + rightEdgesCount); // debug
+
+    straightFences.set(rId, topEdgesCount + bottomEdgesCount + leftEdgesCount + rightEdgesCount);
 });
 
+straightFences.forEach((cnt, rId) => console.log(`${regionIdsPlants.get(rId)}: ${cnt}`)); // Debug
 
-// const rId = 0;
-// console.log(regionCoords.get(rId));
-
-// const coords = regionCoords.get(rId);
-// const startingPos = coords[0];
-
-// let pos = coords[0];
-// let [x, y] = pos;
-
-// while (!isOutOfBounds(i, j) && regionMap[i][j] === null) {
-    
-
-//     i++
-// }
+straightFences.forEach((sides, rId) => totalPrice += sides * areas.get(rId));
+console.log(totalPrice);
