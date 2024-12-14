@@ -38,8 +38,8 @@ let DATA = INPUT.split('\n').map(line => {
 function printMap(coords) {
     const rMap = Array(HEIGHT).fill(null, 0, HEIGHT).map(v => Array(WIDTH).fill('.', 0, WIDTH));
 
-    coords.forEach(xy => {
-        const [x, y] = xy;
+    coords.forEach(r => {
+        const [x, y] = r.p;
         if (rMap[y][x] === '.') rMap[y][x] = 1;
         else rMap[y][x] += 1;
     });
@@ -50,8 +50,8 @@ function printMap(coords) {
 function getSafetyFactor(coords) {
     let q1 = 0, q2 = 0, q3 = 0, q4 = 0;
     
-    coords.forEach(xy => {
-        const [x, y] = xy;
+    coords.forEach(r => {
+        const [x, y] = r.p;
         if (x > (WIDTH-1) / 2 && y < (HEIGHT-1) / 2) q1++;
         if (x < (WIDTH-1) / 2 && y < (HEIGHT-1) / 2) q2++;
         if (x < (WIDTH-1) / 2 && y > (HEIGHT-1) / 2) q3++;
@@ -65,7 +65,7 @@ function getSafetyFactor(coords) {
 
 
 
-console.log(printMap(DATA.map(r => r.p)));
+console.log(printMap(DATA));
 
 
 const seconds = 100;
@@ -78,7 +78,10 @@ let newState = DATA.map(r => {
     if (x < 0) x = WIDTH + x;
     if (y < 0) y = HEIGHT + y;
 
-    return [x, y];
+    return {
+        p: [x, y], 
+        v
+    };
 });
 
 // console.log('————————————————————————————');
@@ -93,3 +96,47 @@ console.log('——————————————————————�
 console.log(printMap(newState));
 console.log(getSafetyFactor(newState));
 
+
+
+
+function isChrismasTree(coords) {
+    let q1 = 0, q2 = 0, q3 = 0, q4 = 0;
+    
+    coords.forEach(r => {
+        const [x, y] = r.p;
+        if (x > (WIDTH-1) / 2 && y < (HEIGHT-1) / 2) q1++;
+        if (x < (WIDTH-1) / 2 && y < (HEIGHT-1) / 2) q2++;
+        if (x < (WIDTH-1) / 2 && y > (HEIGHT-1) / 2) q3++;
+        if (x > (WIDTH-1) / 2 && y > (HEIGHT-1) / 2) q4++;
+    });
+
+    // console.log(q1 , q2 , q3 , q4);
+
+    return q2 * q3 === q1 * q4;
+}
+
+let step = robot => {
+    const {p, v} = robot;
+
+    let x = v[0] === 0 ? p[0] : (p[0] + v[0] * 1) % WIDTH;
+    let y = v[1] === 0 ? p[1] : (p[1] + v[1] * 1) % HEIGHT;
+
+    if (x < 0) x = WIDTH + x;
+    if (y < 0) y = HEIGHT + y;
+
+    return {
+        p: [x, y], 
+        v
+    };
+}
+
+let nextState = DATA.map(step);
+let stepCnt = 1;
+while (!isChrismasTree(nextState)) {
+    nextState = nextState.map(step);
+    stepCnt++;
+}
+
+console.log('————————————————————————————');
+console.log(printMap(nextState));
+console.log(stepCnt);
