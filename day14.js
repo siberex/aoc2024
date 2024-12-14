@@ -29,13 +29,26 @@ let DATA = INPUT.split('\n').map(line => {
     };
 });
 
-// DATA = [{p: [2,4], v:[2,-3]}];
-// DATA = [{p: [0,0], v:[-5,1]}];
+const SEPARATOR = '—'.repeat(WIDTH)
 
-// console.log (WIDTH, HEIGHT);
 // console.log(DATA); // debug
 
-function getMap(coords) {
+const getStateTransformer = seconds => robot => {
+    const {p, v} = robot;
+
+    let x = v[0] === 0 ? p[0] : (p[0] + v[0] * seconds) % WIDTH;
+    let y = v[1] === 0 ? p[1] : (p[1] + v[1] * seconds) % HEIGHT;
+
+    if (x < 0) x = WIDTH + x;
+    if (y < 0) y = HEIGHT + y;
+
+    return {
+        p: [x, y], 
+        v
+    };
+}
+
+const getMap = coords => {
     const map = Array(HEIGHT).fill(null, 0, HEIGHT).map(v => Array(WIDTH).fill(0, 0, WIDTH));
     coords.forEach(r => {
         const [x, y] = r.p;
@@ -44,13 +57,12 @@ function getMap(coords) {
     });
     return map;
 }
-function printMap(coords) {
-    return getMap(coords).map(
-        r => r.map(v => v ? v.toString() : '.').join('')
-    ).join('\n');
-}
 
-function getSafetyFactor(coords) {
+const printMap = coords => getMap(coords).map(
+    r => r.map(v => v ? v.toString(16) : '.').join('')
+).join('\n');
+
+const getSafetyFactor = coords => {
     let q1 = 0, q2 = 0, q3 = 0, q4 = 0;
     
     const midX = (WIDTH - 1) / 2;
@@ -64,102 +76,35 @@ function getSafetyFactor(coords) {
         if (x > midX && y > midY) q4++;
     });
 
-    // console.log(q1 , q2 , q3 , q4);
-
     return q1 * q2 * q3 * q4;
 }
 
-
-
-console.log(printMap(DATA));
-
-
-const seconds = 100;
-let newState = DATA.map(r => {
-    const {p, v} = r;
-
-    let x = v[0] === 0 ? p[0] : (p[0] + v[0] * seconds) % WIDTH;
-    let y = v[1] === 0 ? p[1] : (p[1] + v[1] * seconds) % HEIGHT;
-
-    if (x < 0) x = WIDTH + x;
-    if (y < 0) y = HEIGHT + y;
-
-    return {
-        p: [x, y], 
-        v
-    };
-});
-
-// console.log('————————————————————————————');
-// console.log(newState);
-// console.log((WIDTH-1) / 2, (HEIGHT-1) / 2)
-// console.log(newState.filter(xy => {
-//     const [x, y] = xy;
-//     return (x > (WIDTH-1) / 2 && y < (HEIGHT-1) / 2);
-// }));
-
-console.log('————————————————————————————');
-// console.log(printMap(newState));
-console.log(getSafetyFactor(newState));
-
-
 // Search for 10+ robots in a row
-function isChrismasTree(coords) {
-    const mapStr = getMap(coords).map(
-        r => r.map(v => (v && v === 1) ? v.toString() : '.').join('')
-    ).join('\n');
-    return /1{10}/.test(mapStr);
-}
-/*
-function isChrismasTree(coords) {
-    // Array of [0 .. HEIGHT - 1][0 .. WIDTH - 1]
-    // const map = getMap(coords);
+const isChrismasTree = coords => /1{10}/.test(printMap(coords));
 
-    const midX = (WIDTH - 1) / 2;
-    const midY = (HEIGHT - 1) / 2;
-    for (let i = 0; i < coords.length; i++) {
-        const r = coords[i];
-        const [x, y] = r.p;
-        // console.log(x, WIDTH - x - 1, WIDTH);
-        
-        // skip middle line
-        if (x < midX) {
-            // if (map[y][WIDTH - x - 1] !== map[y][x]) return false;
-            // if ( !coords.some( robot => robot.p[0] === WIDTH - x - 1 ) ) return false;
-        }
-        if (x > midX) {
-            // if (map[y][WIDTH - x - 1] !== map[y][x]) return false;
-            // if ( !coords.some( robot => robot.p[0] === WIDTH - x - 1 ) ) return false;
-        }
-    };
 
-    return true;
-}
-*/
+// console.log(printMap(DATA)); // debug
 
-// let step = (robot, seconds) => robot => {
-let step = robot => {
-    const {p, v} = robot;
+// Part 1
+const seconds = 100;
+let newState = DATA.map(getStateTransformer(100));
 
-    let x = v[0] === 0 ? p[0] : (p[0] + v[0] * 1) % WIDTH;
-    let y = v[1] === 0 ? p[1] : (p[1] + v[1] * 1) % HEIGHT;
+console.log(SEPARATOR);
+// console.log(printMap(newState));
+// console.log(SEPARATOR);
+console.log(getSafetyFactor(newState));
+console.log(SEPARATOR);
 
-    if (x < 0) x = WIDTH + x;
-    if (y < 0) y = HEIGHT + y;
-
-    return {
-        p: [x, y], 
-        v
-    };
-}
-
-let nextState = DATA.map(step);
-let stepCnt = 1;
+// Part 2
+const nextSecond = getStateTransformer(1);
+let nextState = structuredClone(DATA);
+let stepCnt = 0;
 while (!isChrismasTree(nextState) && stepCnt < 10000) {
-    nextState = nextState.map(step);
+    nextState = nextState.map(nextSecond);
     stepCnt++;
 }
 
-console.log('————————————————————————————');
 console.log(printMap(nextState));
+console.log(SEPARATOR);
 console.log(stepCnt);
+console.log(SEPARATOR);
