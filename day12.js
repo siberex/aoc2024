@@ -135,19 +135,28 @@ regionCoords.forEach((coords, rId) => {
         if (fromY === -1) continue;
         const toY = row.findLastIndex(id => id === rId);
 
-        const topEdges = row.filter((id, j) => {
-            if (j < fromY || j > toY) return false; // premature optimization, could be removed
-            if (id !== rId) return false;
-            if (isOutOfBounds(i - 1, j) || regionMap[i - 1][j] !== rId) return true;
-        });
+        let topEdges = [], bottomEdges = [];
+        for (let j = fromY; j <= toY; j++) {
+            if (isOutOfBounds(i - 1, j) || regionMap[i - 1][j] !== rId) 
+                topEdges.push( regionMap[i][j] );
+
+            if (isOutOfBounds(i + 1, j) || regionMap[i + 1][j] !== rId)
+                bottomEdges.push( regionMap[i][j] );
+        }
+
+        // const topEdges = row.filter((id, j) => {
+        //     if (j < fromY || j > toY) return false; // premature optimization, could be removed
+        //     if (id !== rId) return false;
+        //     if (isOutOfBounds(i - 1, j) || regionMap[i - 1][j] !== rId) return true;
+        // });
         const tCnt = topEdges.flatMap(removeConsecutiveRepititions).filter(id => id === rId).length;
 
-        const bottomEdges = row.filter((id, j) => {
-            if (j < fromY || j > toY) return false;
-            if (id !== rId) return false;
-            if (isOutOfBounds(i + 1, j) || regionMap[i + 1][j] !== rId) return true;
-        });
-        // bug is here
+        // const bottomEdges = row.filter((id, j) => {
+        //     if (j < fromY || j > toY) return false;
+        //     if (id !== rId) return false;
+        //     if (isOutOfBounds(i + 1, j) || regionMap[i + 1][j] !== rId) return true;
+        // });
+        // // bug is here
         const bCnt = bottomEdges.flatMap(removeConsecutiveRepititions).filter(id => id === rId).length;
 
         console.log(`↓↓↓ ${regionIdsPlants.get(rId)}:`, row, tCnt, bCnt); // debug
