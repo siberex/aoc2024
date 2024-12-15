@@ -48,7 +48,6 @@ const getTotalGps = map => {
 
 let [X, Y] = getPos(MAP);
 console.log([X, Y]);
-// MAP[X][Y] = '.'
 console.log( MAP.map(r => r.join('')).join('\n') + '\n' ); // debug
 // console.log(MOVES);
 
@@ -59,17 +58,15 @@ const move = (map, pos, dir, debug) => {
 
     const obj = map[x + dx][y + dy];
 
-    if (debug) console.log(obj, [x, y], [dx, dy]);
+    // if (debug) console.log(obj, [x, y], [dx, dy]);
 
-    if (obj === '#') {
-        // Wall, don't move
-        return [x, y];
-        
-    } else if (obj === '.') {
-        // Empty cell, move freely
-        return [x + dx, y + dy];
-
-    } else if (obj === 'O') {
+    // Wall, don't move
+    if (obj === '#') return [x, y];
+    
+    // Empty cell, move freely
+    if (obj === '.' || obj === '@') return [x + dx, y + dy];
+    
+    if (obj === 'O') {
         // Crate, check possible movement
 
         let cx = x + dx, cy = y + dy;
@@ -111,24 +108,26 @@ const move = (map, pos, dir, debug) => {
                     map[x][j] = 'O';
                 }
 
-                if (debug) console.log( y + dy, cy, dy, map[cx][cy] );
+                // if (debug) console.log( y + dy, cy, dy, map[cx][cy] );
             }
 
             map[x + dx][y + dy] = '.';
-
             return [x + dx, y + dy];
         }
     }
+    
+    // This should not happen
+    return undefined;
 }
 
 
 
 
 let pos = [X, Y];
+MAP[X][Y] = '.';
 MOVES.forEach(dir => {
     pos = move(MAP, pos, dir);
 });
-
 MAP[ pos[0] ][ pos[1] ] = '@';
 // console.log( MAP.map(r => r.join('')).join('\n') + '\n' ); // debug
 
@@ -158,19 +157,58 @@ const moveWide = (map, pos, dir, debug) => {
 
     if (debug) console.log(obj, [x, y], [dx, dy]);
 
-    if (obj === '#') {
-        // Wall, don't move
-        return [x, y];
+    // Wall, don't move
+    if (obj === '#') return [x, y];
+
+    // Empty cell, move freely
+    if (obj === '.' || obj === '@') return [x + dx, y + dy];
+
+    // Wide crate
+    if (obj === '[' || obj === ']') {
+        let cx = x + dx, cy = y + dy;
+    
+        let crateLine = '';
+        while (map[cx][cy] === '[' || map[cx][cy] === ']') {
+            crateLine += map[cx][cy];
+            cx += dx;
+            cy += dy;
+        }
+
+        // Wall after the line of crates, don't move
+        if (map[cx][cy] === '#') {
+            return [x, y];
+        }
+
+        // Moving left or right
+        if (dx !== 0) {
+            // Change map
+            if (dx > 0) {
+                for (let i = x + dx; i <= cx; i++) {
+                    map[i][y] = crateLine.shift();
+                }
+            }
+            if (dx < 0) {
+                for (let i = x + dx; i >= cx; i--) {
+                    map[i][y] = crateLine.shift();
+                }
+            }
+        }
         
-    } else if (obj === '.') {
-        // Empty cell, move freely
+        // Moving up or down, have to check the whole crate stack for obstacles
+        if (dy !== 0) {
+
+
+
+            // Change map
+
+        }
+
+        map[x + dx][y + dy] = '.';
         return [x + dx, y + dy];
-
-    } else if (obj === '[' || obj === ']') {
-
-
-
     }
+
+    // This should not happen
+    return undefined;
 }
 
 
