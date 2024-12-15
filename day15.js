@@ -3,7 +3,7 @@
 import fs from 'node:fs/promises';
 import { get } from 'node:http';
 
-const INPUT = await fs.readFile('./input/15.txt', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/15.test3', { encoding: 'utf8' });
 
 const [strMap, strMoves] = INPUT.split('\n\n')
 const MAP = strMap.split('\n').map(row => row.split(''));
@@ -47,9 +47,9 @@ const getTotalGps = map => {
 // console.log(WIDTH, HEIGHT);
 
 let [X, Y] = getPos(MAP);
-console.log(getPos(MAP));
-MAP[X][Y] = '.'
-console.log( MAP.map(r => r.join('')).join('\n') + '\n' );
+console.log([X, Y]);
+// MAP[X][Y] = '.'
+console.log( MAP.map(r => r.join('')).join('\n') + '\n' ); // debug
 // console.log(MOVES);
 
 
@@ -129,61 +129,48 @@ MOVES.forEach(dir => {
     pos = move(MAP, pos, dir);
 });
 
-MAP[ pos[0] ][ pos[1] ] = '@'
-console.log( MAP.map(r => r.join('')).join('\n') + '\n' );
+MAP[ pos[0] ][ pos[1] ] = '@';
+// console.log( MAP.map(r => r.join('')).join('\n') + '\n' ); // debug
 
 console.log(getTotalGps(MAP));
 
 
-/*
-pos = move(MAP, pos, '^');
 
-MAP[ pos[0] ][ pos[1] ] = '@'
-console.log( MAP.map(r => r.join('')).join('\n') + '\n' );
-MAP[ pos[0] ][ pos[1] ] = '.'
+// Part 2
 
-pos = move(MAP, pos, '>');
+const wideStringsMap = {
+    '#': '##',
+    'O': '[]',
+    '.': '..',
+    '@': '@.',
+}
+const WIDEMAP = strMap.split('\n').map(row => row.split('').flatMap(k => wideStringsMap[k].split('')));
 
-MAP[ pos[0] ][ pos[1] ] = '@'
-console.log( MAP.map(r => r.join('')).join('\n') + '\n' );
-MAP[ pos[0] ][ pos[1] ] = '.'
+[X, Y] = getPos(WIDEMAP);
+console.log([X, Y]);
+console.log( WIDEMAP.map(r => r.join('')).join('\n') + '\n' ); // debug
 
-pos = move(MAP, pos, '>');
+const moveWide = (map, pos, dir, debug) => {
+    let [x, y] = pos;
+    let [dx, dy] = movesMapDirections[dir];
 
-MAP[ pos[0] ][ pos[1] ] = '@'
-console.log( MAP.map(r => r.join('')).join('\n') + '\n' );
-MAP[ pos[0] ][ pos[1] ] = '.'
+    const obj = map[x + dx][y + dy];
 
-pos = move(MAP, pos, 'v');
+    if (debug) console.log(obj, [x, y], [dx, dy]);
 
-MAP[ pos[0] ][ pos[1] ] = '@'
-console.log( MAP.map(r => r.join('')).join('\n') + '\n' );
-MAP[ pos[0] ][ pos[1] ] = '.'
+    if (obj === '#') {
+        // Wall, don't move
+        return [x, y];
+        
+    } else if (obj === '.') {
+        // Empty cell, move freely
+        return [x + dx, y + dy];
 
-pos = move(MAP, pos, '<');
-pos = move(MAP, pos, 'v');
-pos = move(MAP, pos, '>');
+    } else if (obj === '[' || obj === ']') {
 
-MAP[ pos[0] ][ pos[1] ] = '@'
-console.log( MAP.map(r => r.join('')).join('\n') + '\n' );
-MAP[ pos[0] ][ pos[1] ] = '.'
 
-pos = move(MAP, pos, '>');
-MAP[ pos[0] ][ pos[1] ] = '@'
-console.log( MAP.map(r => r.join('')).join('\n') + '\n' );
-MAP[ pos[0] ][ pos[1] ] = '.'
 
-pos = move(MAP, pos, 'v');
-MAP[ pos[0] ][ pos[1] ] = '@'
-console.log( MAP.map(r => r.join('')).join('\n') + '\n' );
-MAP[ pos[0] ][ pos[1] ] = '.'
+    }
+}
 
-// wtf
-pos = move(MAP, pos, '<', true);
-pos = move(MAP, pos, '<');
 
-// MAP[ pos[0] ][ pos[1] ] = '@'
-console.log( MAP.map(r => r.join('')).join('\n') + '\n' );
-// MAP[ pos[0] ][ pos[1] ] = '.'
-
-*/
