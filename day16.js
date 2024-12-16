@@ -339,24 +339,24 @@ const heuristic = (current, goal) => {
     const dx = current.x - goal.x;
     const dy = current.y - goal.y;
 
-    const mDist = Math.abs(dx) + Math.abs(dy);
-    let rotationCost = 1;
-    if (current.direction !== goal.direction) rotationCost = 1000;
+    let mDist = Math.max(Math.abs(dx), Math.abs(dy));
+    if (current.direction !== goal.direction) mDist += 1000;
 
-    return rotationCost * mDist;
+    return mDist;
 }
 
 
 const res = astar.search(graph.nodes, start, end, heuristic);
 
-console.log(`Start: ${startX}, ${startY}`);;
-console.log(`End: ${endX}, ${endY}`);
+// console.log(`Start: ${startX}, ${startY}`);;
+// console.log(`End: ${endX}, ${endY}`);
 
+const DATA2 = structuredClone(DATA);
 console.log(DATA.map(r => r.join('')).join('\n') + '\n'); // debug
 
-let score = 1;
+let score = 0;
 let lastDir = start.direction;
-for (let i = 1; i < res.length; i++) {
+for (let i = 0; i < res.length; i++) {
     const node = res[i];
     if (lastDir !== node.direction) {
         score += 1001;
@@ -365,13 +365,20 @@ for (let i = 1; i < res.length; i++) {
         score += 1;
     }
 
-    DATA[node.x][node.y] = node.direction;
+    // const res2 = astar.search(graph.nodes, node, end, heuristic);
+    // res2.forEach(altNode => {
+    //     DATA2[node.x][node.y] = 'O';
+    // });
+
+    // DATA2[node.x][node.y] = 'O';
+    if (i < res.length - 1) DATA[node.x][node.y] = node.direction;
 }
 
 console.log(DATA.map(r => r.join('')).join('\n') + '\n'); // debug
+// console.log(DATA2.map(r => r.join('')).join('\n') + '\n'); // debug
 
-// console.log(res);
-console.log(res.length);
+console.log(res[res.length - 1]);
+console.log(res.length); // steps count
 console.log(score);
 
 
