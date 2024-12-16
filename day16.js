@@ -1,8 +1,9 @@
 // Day 16
 
 import fs from 'node:fs/promises';
+import process from 'node:process';
 
-const INPUT = await fs.readFile('./input/16.test', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/16.txt', { encoding: 'utf8' });
 
 // 16_alt.txt wrong answer (105512). correct is 105508
 // https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm 
@@ -326,10 +327,12 @@ console.log(DATA.map(r => r.join('')).join('\n') + '\n'); // debug
 console.log(shortest_path.length); // steps count
 console.log(score);
 
+// WTF. Now it is 136536 instead of 135536 !
 
+process.exit();
 
 // Part 2
-const grid = convertMap(DATA2);
+let grid = convertMap(DATA2);
 
 let test_score = 0;
 lastDir = start.direction;
@@ -341,13 +344,16 @@ shortest_path.forEach(pathNode => {
     }
     DATA2[pathNode.x][pathNode.y] = 'O'; 
 
-    const test_nodes = astar.neighbors(grid, pathNode).filter(n => n.v === '.');
+    const test_grid = structuredClone(grid);
+    const test_nodes = astar.neighbors(test_grid, pathNode).filter(n => n.v === '.');
 
     test_nodes.forEach(test_node => {
         let tmp_score = test_score;
         let last_probable_dir = lastDir;
-
-        const probable_path = astar.search(grid, test_node, end, heuristic);
+        
+        const test_grid = structuredClone(grid);
+        const probable_path = astar.search(test_grid, test_node, test_grid[endX][endY], heuristic);
+        // console.log(probable_path.length);
 
         probable_path.forEach(pnode => {
             tmp_score++;
@@ -357,7 +363,7 @@ shortest_path.forEach(pathNode => {
             }
         });
 
-        if (tmp_score < score) {
+        if (tmp_score <= score) {
             probable_path.forEach(pnode => {
                 DATA2[pnode.x][pnode.y] = 'O'; 
             });
@@ -370,3 +376,8 @@ shortest_path.forEach(pathNode => {
 });
 
 console.log(DATA2.map(r => r.join('')).join('\n') + '\n'); // debug
+
+console.log( DATA2.map(r => r.join('')).join('\n').match(/O/g)?.length );
+
+// 538 — answer is too low
+// Curiously, it's the right answer for someone else
