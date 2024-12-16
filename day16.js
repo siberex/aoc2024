@@ -37,7 +37,7 @@ const getEnd = map => {
 // console.log(getStart(DATA));
 // console.log(getEnd(DATA));
 
-
+//  https://eloquentjavascript.net/1st_edition/appendix2.html
 function BinaryHeap(scoreFunction) {
     this.content = [];
     this.scoreFunction = scoreFunction;
@@ -323,7 +323,7 @@ shortest_path.forEach(node => {
 
 console.log(DATA.map(r => r.join('')).join('\n') + '\n'); // debug
 
-// console.log(res[res.length - 1]);
+console.log(shortest_path[shortest_path.length - 1]);
 console.log(shortest_path.length); // steps count
 console.log(score);
 
