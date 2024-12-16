@@ -194,7 +194,7 @@ var astar = {
             for (var i = 0, il = neighbors.length; i < il; i++) {
                 var neighbor = neighbors[i];
 
-                if (neighbor.closed || neighbor.v === 1) {
+                if (neighbor.closed || neighbor.v === '#') {
                     // not a valid node to process, skip to next neighbor
                     continue;
                 }
@@ -279,11 +279,8 @@ const convertMap = map => map.map((row, x) => row.map((v, y) => ({
 
 // console.log( MAP.map(r => r.join('')).join('\n') + '\n' ); // debug
 
-// Convert wall symbols '#' to 1 and empty spaces to 0
-const MAP = DATA.map(row => row.map(el => el === '#' ? 1 : 0));
-// console.log(MAP);
 
-let mapConverted = convertMap(MAP);
+let mapConverted = convertMap(DATA);
 
 const [startX, startY] = getStart(DATA);
 const [endX, endY] = getEnd(DATA);
@@ -304,7 +301,7 @@ const heuristic = (current, goal) => {
 }
 
 
-const res = astar.search(mapConverted, start, end, heuristic);
+const shortest_path = astar.search(mapConverted, start, end, heuristic);
 
 // console.log(`Start: ${startX}, ${startY}`);;
 // console.log(`End: ${endX}, ${endY}`);
@@ -314,41 +311,62 @@ console.log(DATA.map(r => r.join('')).join('\n') + '\n'); // debug
 
 let score = 0;
 let lastDir = start.direction;
-for (let i = 0; i < res.length; i++) {
-    const node = res[i];
+shortest_path.forEach(node => {
+    score++;
     if (lastDir !== node.direction) {
-        score += 1001;
+        score += 1000;
         lastDir = node.direction;
-    } else {
-        score += 1;
     }
-
-    // const res2 = astar.search(mapConverted, node, end, heuristic);
-    // res2.forEach(altNode => {
-    //     DATA2[node.x][node.y] = 'O';
-    // });
-
-    // DATA[node.x][node.y] = '0';
-    if (i < res.length - 1) DATA[node.x][node.y] = node.direction;
-}
+    if (node.v !== 'E') DATA[node.x][node.y] = node.direction;
+});
 
 console.log(DATA.map(r => r.join('')).join('\n') + '\n'); // debug
-// console.log(DATA2.map(r => r.join('')).join('\n') + '\n'); // debug
 
 // console.log(res[res.length - 1]);
-console.log(res.length); // steps count
+console.log(shortest_path.length); // steps count
 console.log(score);
 
 
 
 // Part 2
-const nodes = structuredClone(mapConverted);
+const grid = convertMap(DATA2);
 
-res.forEach(node => {
+let test_score = 0;
+lastDir = start.direction;
+shortest_path.forEach(pathNode => {
+    test_score++;
+    if (lastDir !== pathNode.direction) {
+        test_score += 1000;
+        lastDir = pathNode.direction;
+    }
+    DATA2[pathNode.x][pathNode.y] = 'O'; 
 
-    let test_nodes = [];
-    // astar.neighbors(grid, node)
+    const test_nodes = astar.neighbors(grid, pathNode).filter(n => n.v === '.');
 
+    test_nodes.forEach(test_node => {
+        let tmp_score = test_score;
+        let last_probable_dir = lastDir;
+
+        const probable_path = astar.search(grid, test_node, end, heuristic);
+
+        probable_path.forEach(pnode => {
+            tmp_score++;
+            if (last_probable_dir !== pnode.direction) {
+                tmp_score += 1000;
+                last_probable_dir = pnode.direction;
+            }
+        });
+
+        if (tmp_score < score) {
+            probable_path.forEach(pnode => {
+                DATA2[pnode.x][pnode.y] = 'O'; 
+            });
+        }
+
+
+    });
 
 
 });
+
+console.log(DATA2.map(r => r.join('')).join('\n') + '\n'); // debug
