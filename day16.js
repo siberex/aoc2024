@@ -2,7 +2,7 @@
 
 import fs from 'node:fs/promises';
 
-const INPUT = await fs.readFile('./input/16_alt.txt', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/16.test', { encoding: 'utf8' });
 
 // 16_alt.txt wrong answer (105512). correct is 105508
 // https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm 
@@ -15,24 +15,20 @@ const HEIGHT = DATA[0]?.length;
 
 
 const getStart = map => {
-    let x = -1, y = -1;
-    map.forEach((row, i) => row.forEach((v, j) => {
-        if (v === 'S') {
-            x = i;
-            y = j;
-        }
-    }));
+    let y = -1;
+    let x = map.findIndex(row => {
+        y = row.findIndex(v => v === 'S');
+        return y !== -1;
+    });
     return [x, y];
 }
 
 const getEnd = map => {
-    let x = -1, y = -1;
-    map.forEach((row, i) => row.forEach((v, j) => {
-        if (v === 'E') {
-            x = i;
-            y = j;
-        }
-    }));
+    let y = -1;
+    let x = map.findIndex(row => {
+        y = row.findIndex(v => v === 'E');
+        return y !== -1;
+    });
     return [x, y];
 }
 
@@ -156,18 +152,15 @@ BinaryHeap.prototype = {
 
 var astar = {
     init: function (grid) {
-        for (var x = 0, xl = grid.length; x < xl; x++) {
-            for (var y = 0, yl = grid[x].length; y < yl; y++) {
-                var node = grid[x][y];
-                node.f = 0;
-                node.g = 0;
-                node.h = 0;
-                node.direction = grid[x][y].direction ? grid[x][y].direction : '';
-                node.visited = false;
-                node.closed = false;
-                node.parent = null;
-            }
-        }
+        grid.forEach(row => row.forEach(node => {
+            node.f = 0;
+            node.g = 0;
+            node.h = 0;
+            node.direction = '';
+            node.visited = false;
+            node.closed = false;
+            node.parent = null;
+        }));
     }, // init
 
     search: function (grid, start, end, heuristic) {
@@ -201,7 +194,7 @@ var astar = {
             for (var i = 0, il = neighbors.length; i < il; i++) {
                 var neighbor = neighbors[i];
 
-                if (neighbor.closed || neighbor.isWall()) {
+                if (neighbor.closed || neighbor.v === 1) {
                     // not a valid node to process, skip to next neighbor
                     continue;
                 }
@@ -277,67 +270,28 @@ var astar = {
     }, // neighbors
 };
 
-var GraphNodeType = { OPEN: 0, WALL: 1 };
-function Graph(grid) {
-    this.elements = grid;
-    this.nodes = [];
-
-    for (var x = 0, len = grid.length; x < len; ++x) {
-        var row = grid[x];
-        this.nodes[x] = [];
-        for (var y = 0, l = row.length; y < l; ++y) {
-            this.nodes[x].push(new GraphNode(x, y, row[y]));
-        }
-    }
-}
-Graph.prototype.toString = function () {
-    var graphString = "\n";
-    var nodes = this.nodes;
-    for (var x = 0, len = nodes.length; x < len; ++x) {
-        var rowDebug = "";
-        var row = nodes[x];
-        for (var y = 0, l = row.length; y < l; ++y) {
-            rowDebug += row[y].type + " ";
-        }
-        graphString = graphString + rowDebug + "\n";
-    }
-    return graphString;
-};
-
-function GraphNode(x, y, type) {
-    this.data = {};
-    this.x = x;
-    this.y = y;
-    this.pos = { x: x, y: y };
-    this.type = type;
-    // this.direction = '';
-}
-GraphNode.prototype.toString = function () {
-    return "[" + this.x + " " + this.y + "]";
-};
-GraphNode.prototype.isWall = function () {
-    return this.type === GraphNodeType.WALL;
-};
-
-
-
+const convertMap = map => map.map((row, x) => row.map((v, y) => ({
+    x,
+    y,
+    v
+})));
 
 
 // console.log( MAP.map(r => r.join('')).join('\n') + '\n' ); // debug
 
+// Convert wall symbols '#' to 1 and empty spaces to 0
 const MAP = DATA.map(row => row.map(el => el === '#' ? 1 : 0));
 // console.log(MAP);
 
-
-let graph = new Graph(MAP);
+let mapConverted = convertMap(MAP);
 
 const [startX, startY] = getStart(DATA);
 const [endX, endY] = getEnd(DATA);
 
-const start = graph.nodes[startX][startY];
+const start = mapConverted[startX][startY];
 //  Start is facing east
 start.direction = '>';
-const end = graph.nodes[endX][endY];
+const end = mapConverted[endX][endY];
 
 const heuristic = (current, goal) => {
     const dx = current.x - goal.x;
@@ -350,7 +304,7 @@ const heuristic = (current, goal) => {
 }
 
 
-const res = astar.search(graph.nodes, start, end, heuristic);
+const res = astar.search(mapConverted, start, end, heuristic);
 
 // console.log(`Start: ${startX}, ${startY}`);;
 // console.log(`End: ${endX}, ${endY}`);
@@ -369,21 +323,32 @@ for (let i = 0; i < res.length; i++) {
         score += 1;
     }
 
-    // const res2 = astar.search(graph.nodes, node, end, heuristic);
+    // const res2 = astar.search(mapConverted, node, end, heuristic);
     // res2.forEach(altNode => {
     //     DATA2[node.x][node.y] = 'O';
     // });
 
-    // DATA2[node.x][node.y] = 'O';
+    // DATA[node.x][node.y] = '0';
     if (i < res.length - 1) DATA[node.x][node.y] = node.direction;
 }
 
 console.log(DATA.map(r => r.join('')).join('\n') + '\n'); // debug
 // console.log(DATA2.map(r => r.join('')).join('\n') + '\n'); // debug
 
-console.log(res[res.length - 1]);
+// console.log(res[res.length - 1]);
 console.log(res.length); // steps count
 console.log(score);
 
 
-// 135400 — answer is too low
+
+// Part 2
+const nodes = structuredClone(mapConverted);
+
+res.forEach(node => {
+
+    let test_nodes = [];
+    // astar.neighbors(grid, node)
+
+
+
+});
