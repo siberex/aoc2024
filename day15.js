@@ -1,7 +1,6 @@
 // Day 15
 
 import fs from 'node:fs/promises';
-import { get } from 'node:http';
 
 const INPUT = await fs.readFile('./input/15.test3', { encoding: 'utf8' });
 
@@ -50,6 +49,13 @@ let [X, Y] = getPos(MAP);
 console.log([X, Y]);
 console.log( MAP.map(r => r.join('')).join('\n') + '\n' ); // debug
 // console.log(MOVES);
+
+
+const getMovableCrates = (map, x, y) {
+
+
+
+}
 
 
 const move = (map, pos, dir, debug) => {
@@ -196,6 +202,26 @@ const moveWide = (map, pos, dir, debug) => {
         
         // Moving up or down, have to check the whole crate stack for obstacles
         if (dy !== 0) {
+            if (dy > 0) {
+                let depth = 1;
+                const crateHalf1 = crateLine.shift();
+                let crateHalf2;
+
+                if (crateHalf1 === '[') {
+                    crateHalf2 = map[x + 1][y + depth * dy];
+                    // 
+
+                } else if (crateHalf1 === ']') {
+                    crateHalf2 = map[x - 1][y + depth * dy];
+                    // 
+
+                }
+
+
+
+
+
+            }
 
 
 
