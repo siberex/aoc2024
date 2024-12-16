@@ -2,7 +2,7 @@
 
 import fs from 'node:fs/promises';
 
-const INPUT = await fs.readFile('./input/11.test2', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/11.txt', { encoding: 'utf8' });
 
 const DATA = INPUT.split(' ').map(Number);
 
@@ -28,7 +28,9 @@ const blinkMemo = n => {
 
 // const blinkList = stones => stones.flatMap(blinkMemo);
 
+// memoization for depth-25 stones lists
 const MEMO_D25 = new Map();
+// memoization for depth-25 stone counts
 const MEMO_CNT = new Map();
 const expandStoneDepth25 = stone => {
     if (MEMO_CNT.has(stone)) return MEMO_CNT.get(stone);
@@ -56,14 +58,31 @@ console.log(cnt25);
 
 
 console.log('-----------------------------------');
-/*
+
 stones = structuredClone(DATA);
 for (let i = 0; i < 25; i++) {
-    console.log(i);
     stones = stones.flatMap(blinkMemo);
-} 
-console.log(stones.length);
-*/
+}
+
+const counts = stones.map((stone, i) => {
+    let stones2 = [stone];
+
+    if (MEMO_D25.has(stone)) {
+        stones2 = MEMO_D25.get(stone);
+    } else {
+        for (let i = 0; i < 25; i++) {
+            stones2 = stones2.flatMap(blinkMemo);
+        }
+        // MEMO_D25.set(stone, stones2);
+        MEMO_CNT.set(stone, stones2.length);
+    }
+
+    if (i % 100 === 0) console.log(i);
+    return stones2.reduce((acc, stone) => acc + expandStoneDepth25(stone), 0);
+});
+
+console.log( counts.reduce((acc, cnt) => acc + cnt, 0) );
+
 
 
 
