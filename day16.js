@@ -2,7 +2,7 @@
 
 import fs from 'node:fs/promises';
 
-const INPUT = await fs.readFile('./input/16.test2', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/16.txt', { encoding: 'utf8' });
 
 const DATA = INPUT.split('\n').map(r => r.split(''));
 
@@ -354,12 +354,12 @@ console.log(`End: ${endX}, ${endY}`);
 
 console.log(DATA.map(r => r.join('')).join('\n') + '\n'); // debug
 
-let score = 0;
+let score = 1;
 let lastDir = start.direction;
 for (let i = 1; i < res.length; i++) {
     const node = res[i];
     if (lastDir !== node.direction) {
-        score += 1000;
+        score += 1001;
         lastDir = node.direction;
     } else {
         score += 1;
