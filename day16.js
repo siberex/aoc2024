@@ -2,7 +2,11 @@
 
 import fs from 'node:fs/promises';
 
-const INPUT = await fs.readFile('./input/16.txt', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/16_alt.txt', { encoding: 'utf8' });
+
+// 16_alt.txt wrong answer (105512). correct is 105508
+// https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm 
+// fix: save both cost and direction to "visited" prop
 
 const DATA = INPUT.split('\n').map(r => r.split(''));
 
