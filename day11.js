@@ -28,20 +28,42 @@ const blinkMemo = n => {
 
 // const blinkList = stones => stones.flatMap(blinkMemo);
 
+const MEMO_D25 = new Map();
 const MEMO_CNT = new Map();
+const expandStoneDepth25 = stone => {
+    if (MEMO_CNT.has(stone)) return MEMO_CNT.get(stone);
+    let expanded = [stone];
+    for (let i = 0; i < 25; i++) {
+        expanded = expanded.flatMap(blinkMemo);
+    }
+    MEMO_D25.set(stone, expanded);
+    MEMO_CNT.set(stone, expanded.length);
+    return expanded.length;
+}
 
 
 // Part 1
 let stones = structuredClone(DATA);
-for (let i = 0; i < 25; i++) stones = stones.flatMap(blinkMemo);
-console.log(stones.length);
+
+// for (let i = 0; i < 25; i++) {
+//     stones = stones.flatMap(blinkMemo);
+// }
+// console.log(stones.length);
+
+// Memoize first batch
+const cnt25 = stones.reduce((acc, stone) => acc + expandStoneDepth25(stone), 0);
+console.log(cnt25);
+
 
 console.log('-----------------------------------');
-
+/*
 stones = structuredClone(DATA);
-
-
-
+for (let i = 0; i < 25; i++) {
+    console.log(i);
+    stones = stones.flatMap(blinkMemo);
+} 
+console.log(stones.length);
+*/
 
 
 
