@@ -42,7 +42,7 @@ const INSTRUCTIONS = {
     // bst, modulo 8
     2: function(coperand) {
         const operand = getComboOperand(coperand);
-        B = operand % 8;
+        B = operand & 7;
     },
 
     // jnz, jump if not zero
@@ -63,7 +63,7 @@ const INSTRUCTIONS = {
     // out
     5: function(coperand) {
         const operand = getComboOperand(coperand);
-        out.push(operand % 8);
+        out.push(operand & 7);
     },
 
     // bdv
