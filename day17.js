@@ -22,6 +22,8 @@ function getComboOperand(coperand) {
     if (coperand === 4) return A;
     if (coperand === 5) return B;
     if (coperand === 6) return C;
+
+    throw new Error('WTF');
     return undefined;
 }
 
@@ -86,8 +88,9 @@ const INSTRUCTIONS = {
 
 }
 
-let cntOps = 0;
-while (pointer < data.length - 1 && cntOps < 100) {
+// Part 1
+// let cntOps = 0;
+while (pointer < data.length - 1) { // && cntOps < 1000
     const instruction = data[pointer];
     const xoperand = data[pointer + 1];
 
@@ -101,7 +104,47 @@ while (pointer < data.length - 1 && cntOps < 100) {
     
     // Jump instruction, do not increase pointer
     if (instruction !== 3) pointer += 2;
-    cntOps++;
+    // cntOps++;
 }
 
 console.log(out.join(','));
+
+
+// Part 2;
+const [, B0, C0] = strRegs.split('\n').map( reg => parseInt( reg.split(': ').at(1) ) );
+const expectedOut = strProgram.split(': ').at(1);
+
+let A0 = 1;
+B = B0;
+C = C0;
+data = expectedOut.split(',').map(Number);
+
+let cntStop = 0;
+let strOut = '';
+while (strOut !== expectedOut && cntStop < 900000000) {
+    if (cntStop % 10000 === 0) console.log(cntStop / 10000);
+
+    A = ++A0;
+    B = B0;
+    C = C0;
+    data = expectedOut.split(',').map(Number);
+    pointer = 0;
+    out = [];
+
+    // cntOps = 0;
+    while (pointer < data.length - 1) { // && cntOps < 1000
+        const instruction = data[pointer];
+        const xoperand = data[pointer + 1];
+        const fn = INSTRUCTIONS[instruction];
+        fn(xoperand);
+        // Jump instruction, do not increase pointer
+        if (instruction !== 3) pointer += 2;
+        // cntOps++;
+    }
+    strOut = out.join(',');
+
+    cntStop++;
+}
+
+console.log(A0); // (cntStop + 1 === A0);
+console.log(strOut);
