@@ -2,7 +2,7 @@
 
 import fs from 'node:fs/promises';
 
-const INPUT = await fs.readFile('./input/17.txt', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/17.test2', { encoding: 'utf8' });
 
 const [strRegs, strProgram] = INPUT.split('\n\n');
 
@@ -111,40 +111,89 @@ console.log(out.join(','));
 
 
 // Part 2;
+function isEqual(a, b) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+        if (a.at(-i) !== b.at(-i)) return false;
+    }
+
+    // for (let i = 0; i < a.length - 3; i++) {
+    //     if (a.at(-i) !== b.at(-i)) return false;
+    // }
+
+    return true;
+}
+
+
 const [, B0, C0] = strRegs.split('\n').map( reg => parseInt( reg.split(': ').at(1) ) );
 const expectedOut = strProgram.split(': ').at(1);
 
 let A0 = 1;
-B = B0;
-C = C0;
-data = expectedOut.split(',').map(Number);
+
+let REGISTERS = [A0, B0, C0];
+
+const DATA0 = expectedOut.split(',').map(Number);
+const DATA0_JSON = JSON.stringify(DATA0);
 
 let cntStop = 0;
-let strOut = '';
-while (strOut !== expectedOut && cntStop < 900000000) {
-    if (cntStop % 10000 === 0) console.log(cntStop / 10000);
+while (out.length <= data.length && !isEqual(data, out) && A0 <= 100000000 && cntStop < 100) {
+    if (A0 % 1000000 === 0) console.log(A0 / 1000000);
 
-    A = ++A0;
-    B = B0;
-    C = C0;
-    data = expectedOut.split(',').map(Number);
+    REGISTERS[0] = ++A0;
+    REGISTERS[1] = B0;
+    REGISTERS[2] = C0;
+    // data = JSON.parse(DATA0_JSON);
+    data = [...DATA0];
     pointer = 0;
     out = [];
 
-    // cntOps = 0;
-    while (pointer < data.length - 1) { // && cntOps < 1000
+    computer: while (pointer < data.length - 1) {
         const instruction = data[pointer];
-        const xoperand = data[pointer + 1];
-        const fn = INSTRUCTIONS[instruction];
-        fn(xoperand);
-        // Jump instruction, do not increase pointer
-        if (instruction !== 3) pointer += 2;
-        // cntOps++;
+        let operand = data[pointer + 1];
+        // combined operand, fetch from registers
+        if (instruction !== 1 && instruction !== 2 && instruction !== 4) {
+            if (operand > 3) operand = REGISTERS[operand % 4];
+        }
+
+        switch (instruction) {
+            // out
+            case 5:
+                out.push(operand & 7);
+                break;
+            // bxl, bitwise XOR
+            case 1:
+                REGISTERS[1] = REGISTERS[1] ^ operand;
+                break;
+            // bst, modulo 8
+            case 2:
+                REGISTERS[1] = operand & 7;
+                break;
+            // jnz, jump if not zero
+            case 3:
+                if (A !== 0) {
+                    pointer = operand;
+                    continue computer;
+                }
+                break;
+            // bxc, bitwise XOR
+            case 4:
+                REGISTERS[1] = REGISTERS[1] ^ REGISTERS[2];
+                break;
+            // adv, bdv, cdv - division
+            case 0:
+            case 6:
+            case 7:
+                // 0,6,7 → REG 0,1,2
+                REGISTERS[instruction % 5] = parseInt(REGISTERS[0] / Math.pow(2, operand));
+                break;
+        }
+        // Increase pointer
+        pointer += 2;
+
     }
-    strOut = out.join(',');
 
     cntStop++;
 }
 
 console.log(A0); // (cntStop + 1 === A0);
-console.log(strOut);
+console.log( out.join(',') );
