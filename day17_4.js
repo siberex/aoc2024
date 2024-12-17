@@ -124,8 +124,12 @@ const expected = expectedOut.split(',').map(Number);
 // A0 <= 281474976710654;
 // Number.MAX_SAFE_INTEGER === 9007199254740991 — answer is too high
 
+// Atest  = 123145302310911 — answer is too low
+// new A0 = 123145302310912
+//    A0 <= 281474976710654;
+//   midA = 202310139510783
 
-let A0 = 35184372088831;
+let A0 = 123145302310912;
 B = B0;
 C = C0;
 data = expectedOut.split(',').map(Number);
@@ -149,11 +153,13 @@ function isAlmostEqual(a, b) {
 
 out = [];
 let cntStop = 0;
-while (out.length <= data.length && !isAlmostEqual(data, out) && A0 <= 281474976710654 /*cntStop < 10*/) {
+while (out.length <= data.length && !isAlmostEqual(data, out) && A0 <= 281474976710654 /*&& cntStop < 10*/) {
     if (A0 % 100000 === 0) console.log(A0 / 100000);
     /* if (A0 % 1000000 === 0)*/ //console.log( out.join(',') );
 
-    A = ++A0;
+    A0++;
+    // A0 = A0 + 1000000;
+    A = A0;
     B = B0;
     C = C0;
     data = expectedOut.split(',').map(Number);
@@ -170,13 +176,13 @@ while (out.length <= data.length && !isAlmostEqual(data, out) && A0 <= 281474976
         if (instruction !== 3) pointer += 2;
         // cntOps++;
 
-        // if (out.length) {
-        //     for (let i = 0; i < out.length; i++) {
-        //         if (out.at(i) !== data.at(i)) break computer; 
-        //     }
-        // }
+        if (out.length) {
+            for (let i = 0; i < out.length; i++) {
+                if (out.at(i) !== data.at(i)) break computer; 
+            }
+        }
     }
-    // console.log( out.join(',') );
+    if (out.length == data.length && out.at(0) === data.at(0)) console.log( out.join(',') );
 
     cntStop++;
 }
