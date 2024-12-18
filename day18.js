@@ -6,11 +6,13 @@ const INPUT = await fs.readFile('./input/18.txt', { encoding: 'utf8' });
 
 const DATA = INPUT.split('\n').map(r => r.split(',').map(Number));
 
+// const CORRUPTED_LEN = 12;
 // const END_X = 6;
 // const END_Y = 6;
 
 const END_X = 70;
 const END_Y = 70;
+const CORRUPTED_LEN = 1024;
 
 const fillMap = (listCorrupted) => {
     const map = Array(END_Y + 1).fill(null, 0, END_Y + 1).map(v => Array(END_X + 1).fill('.', 0, END_X + 1));
@@ -26,30 +28,15 @@ const convertMap = map => map.map((row, y) => row.map((v, x) => ({
 
 const printMap = map => map.map(row => row.join('')).join('\n');
 
-
-
-
-
-
-
-
-
-
-
-
-// const CORRUPTED_LEN = 12;
-const CORRUPTED_LEN = 1024;
-
-let listCorrupted = DATA.slice(0, CORRUPTED_LEN).map(xy => {const [x, y] = xy; return {x, y, v: '#'};});
+const listCorrupted = DATA.slice(0, CORRUPTED_LEN).map(xy => {const [x, y] = xy; return {x, y, v: '#'};});
 // console.log(listCorrupted);
-
-let map = fillMap(listCorrupted);
+const map = fillMap(listCorrupted);
 // console.log(printMap(map) + '\n'); // visualize
+const mapNodes = convertMap(map);
 
-let mapNodes = convertMap(map);
-
-let astar = new AStar(mapNodes);
-// console.log(astar.printGrid());
+const astar = new AStar(mapNodes);
+astar.printNode = (node => node.closed ? 'O' : node.v);
+console.log(astar.printGrid());
 let shortest_path = astar.search(mapNodes[0][0], mapNodes[END_Y][END_X]);
 // console.log(shortest_path);
 
@@ -57,6 +44,7 @@ shortest_path.forEach(node => {
     map[node.y][node.x] = 'O';
 });
 console.log(printMap(map) + '\n'); // visualize
+console.log(astar.printGrid());
 
 console.log(shortest_path.length);
 
@@ -67,14 +55,15 @@ console.log(shortest_path.length);
 
 for (let i = CORRUPTED_LEN + 1; i < DATA.length; i++) {
 
-    let listCorrupted = DATA.slice(0, i).map(xy => {const [x, y] = xy; return {x, y, v: '#'};});
+    const listCorrupted = DATA.slice(0, i).map(xy => {const [x, y] = xy; return {x, y, v: '#'};});
     
     // Check that new corrupted pixel is on the path, and if it is, compute the new shortest path
     if (shortest_path.findIndex(node => node.y === DATA[i][1] && node.x === DATA[i][0]) !== -1) {
-        let map = fillMap(listCorrupted);
-        let mapNodes = convertMap(map);
 
-        let astar = new AStar(mapNodes);
+        const map = fillMap(listCorrupted);
+        const mapNodes = convertMap(map);
+
+        const astar = new AStar(mapNodes);
         shortest_path = astar.search(mapNodes[0][0], mapNodes[END_Y][END_X]);
     }
 
