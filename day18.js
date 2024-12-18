@@ -1,5 +1,5 @@
 // Day 18
-import AStar from './_astar2.js';
+import AStar from './_astar.js';
 import fs from 'node:fs/promises';
 
 const INPUT = await fs.readFile('./input/18.txt', { encoding: 'utf8' });
@@ -45,13 +45,13 @@ let listCorrupted = DATA.slice(0, CORRUPTED_LEN).map(xy => {const [x, y] = xy; r
 // console.log(listCorrupted);
 
 let map = fillMap(listCorrupted);
-console.log(printMap(map) + '\n'); // visualize
+// console.log(printMap(map) + '\n'); // visualize
 
 let mapNodes = convertMap(map);
 
-// let astar = new AStar(mapNodes);
-// let shortest_path = astar.search(mapNodes[0][0], mapNodes[END_Y][END_X]);
-let shortest_path = AStar.search(mapNodes, mapNodes[0][0], mapNodes[END_Y][END_X]);
+let astar = new AStar(mapNodes);
+// console.log(astar.printGrid());
+let shortest_path = astar.search(mapNodes[0][0], mapNodes[END_Y][END_X]);
 // console.log(shortest_path);
 
 shortest_path.forEach(node => {
@@ -76,15 +76,15 @@ for (let i = CORRUPTED_LEN + 1; i < DATA.length; i++) {
         let map = fillMap(listCorrupted);
         let mapNodes = convertMap(map);
 
-        // let astar = new AStar(mapNodes);
-        // shortest_path = astar.search(mapNodes[0][0], mapNodes[END_Y][END_X]);
-        shortest_path = AStar.search(mapNodes, mapNodes[0][0], mapNodes[END_Y][END_X]);
+        let astar = new AStar(mapNodes);
+        shortest_path = astar.search(mapNodes[0][0], mapNodes[END_Y][END_X]);
     }
 
     // No path available
     if (shortest_path.length === 0) {
         // console.log(printMap(map) + '\n'); // debug
-        console.log(listCorrupted.at(-1));
+        const {x, y} = listCorrupted.at(-1);
+        console.log(`${x},${y}`);
         break;
     }
 }
