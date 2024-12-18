@@ -74,19 +74,27 @@ const printOut = (registers, operand, pointer, output) => {
 }
 
 let REGISTERS = structuredClone(INIT_REGISTERS);
-REGISTERS[0] = 223147650281405;
+
+let A = 123456;
+REGISTERS[0] = A;
 let OUT_DATA = [];
 
 [REGISTERS, OUT_DATA] = machineGoBrrr(REGISTERS, INIT_DATA, printOut);
 console.log(OUT_DATA.join(',')); // part 1
 
 
-
+while (A !== 0) {
+    console.log(
+        ( ( ((A & 7) ^ 1) ^ 5) ^ parseInt( A / 2**((A & 7) ^ 1) ) ) & 7
+    );
+    A >>= 3;
+}
 
 process.exit();
 
 /*
 Data: 2,4, 1,1, 7,5, 1,5, 0,3, 4,3, 5,5, 3,0
+
 2_BST(4): B = A & 7
 1_BXL(1): B = B ^ 1
 7_CDV(5): C = (int) A / 2**B
@@ -105,6 +113,20 @@ B = (B ^ 5) ^ C
 _print B & 7
 _repeat while A ≠ 0
 
+↓
+
+B = (A & 7) ^ 1
+B = (B ^ 5) ^ ( (int) A / 2**B )            # C = parseInt(A / (1<<B))
+A = (int) A / 8
+_print B & 7
+_repeat while A ≠ 0
+
+↓
+
+# B = ( ((A & 7) ^ 1) ^ 5) ^ parseInt( A / 2**((A & 7) ^ 1) )
+_print ( ( ((A & 7) ^ 1) ^ 5) ^ parseInt( A / 2**((A & 7) ^ 1) ) ) & 7
+A >>= 3
+_repeat while A ≠ 0
 */
 
 
