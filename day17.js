@@ -22,13 +22,14 @@ const machineGoBrrr = (registers, data, printOut) => {
         const instruction = data[pointer];
         let operand = data[pointer + 1];
 
-        // combo operand, used with all opcodes except bxl(1) and jnz(3)
-        // with opcode bxc(4) operand is ignored
+        // Combo operand, used with all opcodes except bxl(1), jnz(3) and bxc(4)
+        // with bxc(4) opcode operand is ignored
+        // So, combo operand is used with adv(0), bdv(7), cdv(7), bst(2) and out(5)
         if ( operand > 3
              && instruction !== 1
              && instruction !== 3
              && instruction !== 4 )
-             // 4,5,6 values → 0,1,2 registers
+             // 4,5,6 values → 0,1,2 registers (4→A, 5→B, 6→C)
              operand = registers[operand % 4];
 
         switch (instruction) {
