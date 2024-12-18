@@ -69,26 +69,56 @@ const machineGoBrrr = (registers, data, printOut) => {
 
 // Part 1
 const printOut = (registers, operand, pointer, output) => {
-    console.log(registers, operand, pointer, output);
-
+    // console.log(registers, operand, pointer, output);
 }
 
 let REGISTERS = structuredClone(INIT_REGISTERS);
 
-let A = 123456;
-REGISTERS[0] = A;
+// let A = 123456789;
+// REGISTERS[0] = A;
 let OUT_DATA = [];
 
 [REGISTERS, OUT_DATA] = machineGoBrrr(REGISTERS, INIT_DATA, printOut);
 console.log(OUT_DATA.join(',')); // part 1
 
-
-while (A !== 0) {
-    console.log(
-        ( ( ((A & 7) ^ 1) ^ 5) ^ parseInt( A / 2**((A & 7) ^ 1) ) ) & 7
+// Test simplified state machine:
+let A = INIT_REGISTERS[0];
+let OUT_DATA_TEST = [];
+while (A !== 0 && OUT_DATA_TEST.length < OUT_DATA.length) {
+    OUT_DATA_TEST.push(
+        ( ( ((A & 7) ^ 1) ^ 5) ^ parseInt( A / ( 1<<((A & 7) ^ 1) ) ) ) & 7
     );
-    A >>= 3;
+    // This is equal to A = parseInt(A / 8), but ONLY for 32-bit integers:
+    // A >>= 3;
+    A = parseInt(A / 8);
 }
+console.log(OUT_DATA_TEST.join(','));
+
+
+const DIGITS = new Map();
+// Map from A & 7 to the output digit
+for (let A = 0; A < 100; A++) {
+
+    let B = A & 7;
+    B = B ^ 1; // let B = (A & 7) ^ 1;
+
+    let C = parseInt(A / (2 ** B));
+    B = B ^ 5;
+    B = B ^ C; // B = (B ^ 5) ^ C;
+
+    // const OUT = ( ( ((A & 7) ^ 1) ^ 5) ^ parseInt( A / ( 1<<((A & 7) ^ 1) ) ) ) & 7;
+    const OUT = B & 7;
+
+    if (!DIGITS.has(OUT)) DIGITS.set(OUT, A);
+    // console.log(A, OUT);
+}
+
+console.log(DIGITS);
+
+const program_reversed = structuredClone(INIT_DATA).reverse();
+
+console.log(program_reversed);
+console.log(INIT_DATA);
 
 process.exit();
 
