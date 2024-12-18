@@ -263,7 +263,7 @@ let listCorrupted = DATA.slice(0, CORRUPTED_LEN).map(xy => {const [x, y] = xy; r
 // console.log(listCorrupted);
 
 let map = fillMap(listCorrupted);
-console.log(printMap(map));
+console.log(printMap(map) + '\n');
 
 let mapNodes = convertMap(map);
 const start = mapNodes[0][0];
@@ -275,6 +275,27 @@ const shortest_path = astar.search(mapNodes, start, end);
 shortest_path.forEach(node => {
     map[node.y][node.x] = 'O';
 });
-console.log(printMap(map));
+console.log(printMap(map) + '\n');
 
 console.log(shortest_path.length);
+
+
+// Part 2
+
+for (let i = CORRUPTED_LEN + 1; i < DATA.length; i++) {
+    let listCorrupted = DATA.slice(0, i).map(xy => {const [x, y] = xy; return {x, y, v: '#'};});
+    let map = fillMap(listCorrupted);
+
+    let mapNodes = convertMap(map);
+    const start = mapNodes[0][0];
+    const end = mapNodes[END_Y][END_X];
+
+    const shortest_path = astar.search(mapNodes, start, end);
+    if (shortest_path.length === 0) {
+        // console.log(printMap(map) + '\n'); // debug
+        console.log(listCorrupted.at(-1));
+
+        break;
+    }
+
+}
