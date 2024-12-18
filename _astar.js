@@ -10,10 +10,10 @@ class AStar {
      * @param {Callable?} isWall called to check if grid node is an impassable wall. By default checks if node.v === '#'
      */
     constructor(grid, heuristic, gScore, onStep, isWall) {
-        // this.heuristic = heuristic === undefined ? this.manhattan : heuristic;
-        // this.gScore = gScore === undefined ? (current, adjacent) => current.g + 1 : gScore;
-        // this.onStep = onStep === undefined ? () => {} : onStep;
-        // this.isWall = isWall === undefined ? (node => node.v === '#') : isWall;
+        this.heuristic = heuristic === undefined ? this.manhattan : heuristic;
+        this.gScore = gScore === undefined ? (current, adjacent) => current.g + 1 : gScore;
+        this.onStep = onStep === undefined ? () => {} : onStep;
+        this.isWall = isWall === undefined ? (node => node.v === '#') : isWall;
 
         // Enrich frid nodes with some additional fields
         grid.forEach(row => row.forEach(node => {
@@ -36,18 +36,6 @@ class AStar {
         return node.v;
     }
 
-    gScore(current, adjacent) {
-        return current.g + 1
-    }
-
-    onStep(node) {
-        // noop
-    }
-
-    isWall(node) {
-        return node.v === '#'
-    }
-
     heuristic(current, goal) {
         // See list of heuristics: http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
 
@@ -65,24 +53,10 @@ class AStar {
         const x = node.x;
         const y = node.y;
 
-        if (grid[x - 1] && grid[x - 1][y]) {
-            adjacent.push(grid[x - 1][y]);
-        }
-        if (grid[x + 1] && grid[x + 1][y]) {
-            adjacent.push(grid[x + 1][y]);
-        }
-        if (grid[x] && grid[x][y - 1]) {
-            adjacent.push(grid[x][y - 1]);
-        }
-        if (grid[x] && grid[x][y + 1]) {
-            adjacent.push(grid[x][y + 1]);
-        }
-
-        // rows → columns:
-        // if (grid[y - 1] && grid[y - 1][x]) adjacent.push(grid[y - 1][x]);
-        // if (grid[y + 1] && grid[y + 1][x]) adjacent.push(grid[y + 1][x]);
-        // if (grid[y]     && grid[y][x - 1]) adjacent.push(grid[y][x - 1]);
-        // if (grid[y]     && grid[y][x + 1]) adjacent.push(grid[y][x + 1]);
+        if (grid[y - 1] && grid[y - 1][x]) adjacent.push(grid[y - 1][x]);
+        if (grid[y + 1] && grid[y + 1][x]) adjacent.push(grid[y + 1][x]);
+        if (grid[y]     && grid[y][x - 1]) adjacent.push(grid[y][x - 1]);
+        if (grid[y]     && grid[y][x + 1]) adjacent.push(grid[y][x + 1]);
 
         return adjacent;
     } // neighbors

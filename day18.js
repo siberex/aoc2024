@@ -18,8 +18,7 @@ const fillMap = (listCorrupted) => {
     return map;
 };
 
-// x and y are swapped, but whatever
-const convertMap = map => map.map((row, x) => row.map((v, y) => ({
+const convertMap = map => map.map((row, y) => row.map((v, x) => ({
     x,
     y,
     v
@@ -70,9 +69,8 @@ for (let i = CORRUPTED_LEN + 1; i < DATA.length; i++) {
 
     let listCorrupted = DATA.slice(0, i).map(xy => {const [x, y] = xy; return {x, y, v: '#'};});
     
-    // Check that new corrupted pixel is on the path, and if it is, compute new shortest path
-    if (shortest_path.findIndex(node => (node.y === DATA[i][0]) && (node.x === DATA[i][1])) !== -1) {
-
+    // Check that new corrupted pixel is on the path, and if it is, compute the new shortest path
+    if (shortest_path.findIndex(node => node.y === DATA[i][1] && node.x === DATA[i][0]) !== -1) {
         let map = fillMap(listCorrupted);
         let mapNodes = convertMap(map);
 
