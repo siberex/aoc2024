@@ -85,6 +85,28 @@ console.log(OUT_DATA.join(',')); // part 1
 
 process.exit();
 
+/*
+Data: 2,4, 1,1, 7,5, 1,5, 0,3, 4,3, 5,5, 3,0
+2_BST(4): B = A & 7
+1_BXL(1): B = B ^ 1
+7_CDV(5): C = (int) A / 2**B
+1_BXL(5): B = B ^ 5
+0_ADV(3): A = A // 2**3 → A = (int) A / 8
+4_BXC(_): B = B ^ C
+5_OUT(5): _print B & 7
+3_JNZ(0): _repeat while A ≠ 0
+
+↓
+
+B = (A & 7) ^ 1
+C = (int) A / 2**B
+A = (int) A / 8
+B = (B ^ 5) ^ C
+_print B & 7
+_repeat while A ≠ 0
+
+*/
+
 
 
 // Part 2;
