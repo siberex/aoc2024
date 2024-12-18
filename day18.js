@@ -1,6 +1,8 @@
 // Day 18
 
 import fs from 'node:fs/promises';
+import BinaryHeap from './_binaryheap.js';
+
 const INPUT = await fs.readFile('./input/18.txt', { encoding: 'utf8' });
 
 const DATA = INPUT.split('\n').map(r => r.split(',').map(Number));
@@ -17,6 +19,7 @@ const fillMap = (listCorrupted) => {
     return map;
 };
 
+// x and y are swapped, but whatever
 const convertMap = map => map.map((row, x) => row.map((v, y) => ({
     x,
     y,
@@ -25,123 +28,9 @@ const convertMap = map => map.map((row, x) => row.map((v, y) => ({
 
 const printMap = map => map.map(row => row.join('')).join('\n');
 
-// console.log(DATA);
 
 
 
-//  https://eloquentjavascript.net/1st_edition/appendix2.html
-function BinaryHeap(scoreFunction) {
-    this.content = [];
-    this.scoreFunction = scoreFunction;
-}
-
-BinaryHeap.prototype = {
-    push: function (element) {
-        // Add the new element to the end of the array.
-        this.content.push(element);
-        // Allow it to sink down.
-        this.sinkDown(this.content.length - 1);
-    }, // push
-
-    pop: function () {
-        // Store the first element so we can return it later.
-        var result = this.content[0];
-        // Get the element at the end of the array.
-        var end = this.content.pop();
-        // If there are any elements left, put the end element at the
-        // start, and let it bubble up.
-        if (this.content.length > 0) {
-            this.content[0] = end;
-            this.bubbleUp(0);
-        }
-        return result;
-    }, // pop
-
-    remove: function (node) {
-        var i = this.content.indexOf(node);
-
-        // When it is found, the process seen in 'pop' is repeated
-        // to fill up the hole.
-        var end = this.content.pop();
-        if (i != this.content.length - 1) {
-            this.content[i] = end;
-            if (this.scoreFunction(end) < this.scoreFunction(node)) this.sinkDown(i);
-            else this.bubbleUp(i);
-        }
-    }, // remove
-
-    size: function () {
-        return this.content.length;
-    },
-
-    rescoreElement: function (node) {
-        this.sinkDown(this.content.indexOf(node));
-    }, // rescoreElement
-
-    sinkDown: function (n) {
-        // Fetch the element that has to be sunk.
-        var element = this.content[n];
-        // When at 0, an element can not sink any further.
-        while (n > 0) {
-            // Compute the parent element's index, and fetch it.
-            var parentN = ((n + 1) >> 1) - 1,
-                parent = this.content[parentN];
-            // Swap the elements if the parent is greater.
-            if (this.scoreFunction(element) < this.scoreFunction(parent)) {
-                this.content[parentN] = element;
-                this.content[n] = parent;
-                // Update 'n' to continue at the new position.
-                n = parentN;
-            }
-            // Found a parent that is less, no need to sink any further.
-            else {
-                break;
-            }
-        }
-    }, // sinkDown
-
-    bubbleUp: function (n) {
-        // Look up the target element and its score.
-        var length = this.content.length,
-            element = this.content[n],
-            elemScore = this.scoreFunction(element);
-
-        while (true) {
-            // Compute the indices of the child elements.
-            var child2N = (n + 1) << 1,
-                child1N = child2N - 1;
-            // This is used to store the new position of the element,
-            // if any.
-            var swap = null;
-            // If the first child exists (is inside the array)...
-            if (child1N < length) {
-                // Look it up and compute its score.
-                var child1 = this.content[child1N],
-                    child1Score = this.scoreFunction(child1);
-                // If the score is less than our element's, we need to swap.
-                if (child1Score < elemScore) swap = child1N;
-            }
-            // Do the same checks for the other child.
-            if (child2N < length) {
-                var child2 = this.content[child2N],
-                    child2Score = this.scoreFunction(child2);
-                if (child2Score < (swap == null ? elemScore : child1Score))
-                    swap = child2N;
-            }
-
-            // If the element needs to be moved, swap it, and continue.
-            if (swap != null) {
-                this.content[n] = this.content[swap];
-                this.content[swap] = element;
-                n = swap;
-            }
-            // Otherwise, we are done.
-            else {
-                break;
-            }
-        }
-    }, // bubbleUp
-};
 
 var astar = {
     init: function (grid) {
@@ -263,39 +152,44 @@ let listCorrupted = DATA.slice(0, CORRUPTED_LEN).map(xy => {const [x, y] = xy; r
 // console.log(listCorrupted);
 
 let map = fillMap(listCorrupted);
-console.log(printMap(map) + '\n');
+console.log(printMap(map) + '\n'); // visualize
 
 let mapNodes = convertMap(map);
 const start = mapNodes[0][0];
 const end = mapNodes[END_Y][END_X];
 
-const shortest_path = astar.search(mapNodes, start, end);
+let shortest_path = astar.search(mapNodes, start, end);
 // console.log(shortest_path);
 
 shortest_path.forEach(node => {
     map[node.y][node.x] = 'O';
 });
-console.log(printMap(map) + '\n');
+console.log(printMap(map) + '\n'); // visualize
 
 console.log(shortest_path.length);
 
 
 // Part 2
 
+// TODO: binary search for data?
+
 for (let i = CORRUPTED_LEN + 1; i < DATA.length; i++) {
+
     let listCorrupted = DATA.slice(0, i).map(xy => {const [x, y] = xy; return {x, y, v: '#'};});
-    let map = fillMap(listCorrupted);
+    
+    // Check that new corrupted pixel is on the path, and if it is, compute new shortest path
+    if (shortest_path.findIndex(node => (node.y === DATA[i][0]) && (node.x === DATA[i][1])) !== -1) {
 
-    let mapNodes = convertMap(map);
-    const start = mapNodes[0][0];
-    const end = mapNodes[END_Y][END_X];
+        let map = fillMap(listCorrupted);
+        let mapNodes = convertMap(map);
 
-    const shortest_path = astar.search(mapNodes, start, end);
+        shortest_path = astar.search(mapNodes, mapNodes[0][0], mapNodes[END_Y][END_X]);
+    }
+
+    // No path available
     if (shortest_path.length === 0) {
         // console.log(printMap(map) + '\n'); // debug
         console.log(listCorrupted.at(-1));
-
         break;
     }
-
 }
