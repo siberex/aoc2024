@@ -89,13 +89,20 @@ let OUT_DATA = [];
 
 const expectedOut = strProgram.split(': ').at(1);
 const DATA_EXPECTED = expectedOut.split(',').map(Number);
+const expectedNumerical = combineNumberFrom3BitMasks(DATA_EXPECTED);
 // console.log(DATA_EXPECTED);
-console.log(`Expected output: ${expectedOut}`);
+// console.log(`Expected output: ${expectedOut}`);
+// console.log(`Expected as number: ${expectedNumerical}`);
+// console.log(`Expected as num: ${splitNumber3BitMask(expectedNumerical)}`);
 
 // Test simplified state machine:
-const A_TEST = 173440400472902;
-// const A_TEST = 214228331689724;
+// const A_TEST = 173440400472902;
+const A_TEST = 16316994351714;
 
+console.log('A_TEST_ORIGINA', A_TEST)
+const A_TEST_SPLIT = splitNumber3BitMask(A_TEST);
+console.log('A_TEST_SPLIT', A_TEST_SPLIT);
+console.log('A_TEST_COMPARE', combineNumberFrom3BitMasks(A_TEST_SPLIT));
 
 
 
@@ -201,6 +208,7 @@ let A_split = [
     3, 6, 7, 4
 ]
 
+/*
 outer: for (let m = 0; m < 8; m++) {
     for (let n = 0; n < 8; n++) {
         for (let k = 0; k < 8; k++) {
@@ -215,7 +223,7 @@ outer: for (let m = 0; m < 8; m++) {
         }
     }
 }
-
+*/
 
 
 // console.log('?', combineNumberFrom3BitMasks(A_split));
@@ -223,7 +231,7 @@ outer: for (let m = 0; m < 8; m++) {
 
 
 
-
+/*
 for (let m = 0; m < 8; m++) {
     for (let n = 0; n < 8; n++) {
         const computed = lightCompute(combineNumberFrom3BitMasks([m, n]));
@@ -231,12 +239,11 @@ for (let m = 0; m < 8; m++) {
 
     }
 }
+*/
 
 for (let i = A_split.length - 3; i > 0; i -= 2) {
 
     // console.log (A_split[i - 1], A_split[i]);
-
-
 
 }
 
