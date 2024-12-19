@@ -3,6 +3,7 @@
 // 77 → [1, 1, 5]
 // 173440400472902 → [4, 7, 3, 3, 7, 0, 7, 5, 3, 5, 3, 3, 5, 5, 0, 6]
 // 16316994351714 → [3, 5, 5, 3, 4, 3, 0, 5, 1, 5, 7, 1, 1, 4, 2]
+// 88645122800472 → [2, 4, 1, 1, 7, 5, 1, 5, 0, 3, 4, 3, 5, 5, 3, 0]
 export const splitNumber3BitMask = n => {
     let bigN = BigInt(n);
     let res = [];
@@ -19,6 +20,7 @@ export const splitNumber3BitMask = n => {
 // [1, 1, 5] → 77
 // [4, 7, 3, 3, 7, 0, 7, 5, 3, 5, 3, 3, 5, 5, 0, 6] → 173440400472902
 // [3, 5, 5, 3, 4, 3, 0, 5, 1, 5, 7, 1, 1, 4, 2] → 16316994351714
+// [2, 4, 1, 1, 7, 5, 1, 5, 0, 3, 4, 3, 5, 5, 3, 0] → 88645122800472
 export const combineNumberFrom3BitMasks = arr => {
     // JS have 32-bit bitwise arithmetic,
     // So BigInt have to be used for any arr.length > 10
@@ -99,4 +101,9 @@ function generatePermutations(n, base) {
     }
   
     return states;
+}
+
+
+function findAllCombinationsToFillStr(patterns, string) {
+
 }

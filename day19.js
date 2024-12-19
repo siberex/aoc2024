@@ -1,17 +1,31 @@
 // Day 19
 
 import fs from 'node:fs/promises';
-import {permutator} from './_utils.js';
+// import {permutator} from './_utils.js';
 
-const INPUT = await fs.readFile('./input/19.test', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/19.txt', { encoding: 'utf8' });
 
 const [PATTERNS_RAW, DESIGNS_RAW] = INPUT.split('\n\n');
 const DESIGNS = DESIGNS_RAW.split('\n').filter(v => v);
 const PATTERNS = PATTERNS_RAW.split(', ');
 
+const patternsRegex = new RegExp(`(${PATTERNS.join('|')})+`, 'gm');
+
+// console.log(`^(${PATTERNS.join('|')})+$`);
+// console.log(DESIGNS_RAW);
+
+console.log( DESIGNS_RAW.match(patternsRegex).length );
 
 
+const possibleDesigns = DESIGNS.filter((design, i) => {
+    console.log (i);
+    return design.match(patternsRegex) !== null;
+});
 
+console.log(`Part 1: ${possibleDesigns.length}`);
+
+
+/*
 function countCompositions(design, patterns) {
     // let count = 0;
     let isPossible = true;
@@ -37,7 +51,7 @@ for (const design of DESIGNS) {
     console.log(design, res);
 }
 
-
+*/
 
 
 
