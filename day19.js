@@ -9,12 +9,12 @@ const [PATTERNS_RAW, DESIGNS_RAW] = INPUT.split('\n\n');
 const DESIGNS = DESIGNS_RAW.split('\n').filter(v => v);
 const PATTERNS = PATTERNS_RAW.split(', ');
 
-const patternsRegex = new RegExp(`(${PATTERNS.join('|')})+`, 'gm');
+const patternsRegex = new RegExp(`^(${PATTERNS.join('|')})+$`, 'g');
 
 // console.log(`^(${PATTERNS.join('|')})+$`);
 // console.log(DESIGNS_RAW);
 
-console.log( DESIGNS_RAW.match(patternsRegex).length );
+// console.log( DESIGNS_RAW.match(patternsRegex).length );
 
 
 const possibleDesigns = DESIGNS.filter((design, i) => {
