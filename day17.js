@@ -102,7 +102,7 @@ const A_TEST = 173440400472902;
 
 // console.log('A_TEST_ORIGINA', A_TEST)
 const A_TEST_SPLIT = splitNumber3BitMask(A_TEST);
-console.log('A_TEST_SPLIT', A_TEST_SPLIT);
+// console.log('A_TEST_SPLIT', A_TEST_SPLIT);
 // console.log('A_TEST_COMPARE', combineNumberFrom3BitMasks(A_TEST_SPLIT));
 
 
@@ -138,8 +138,44 @@ const lightCompute = testA => {
     return res.map(Number);
 }
 
+const lightComputeMap = testA => {
+    let A = BigInt(testA);
 
-console.log( `Produced output: ${lightCompute(A_TEST).join(',')}` );
+    return splitNumber3BitMask(testA).map((n, i) => {
+        // n = A & 7
+        // const Adigit = BigInt(n);
+        const Ai = A >> (3n * BigInt(i));
+
+        console.log(i, n, Ai);
+
+        const Adigit = Ai & 7n;
+        const digit = ( ( (Adigit ^ 1n) ^ 5n) ^ ( Ai / ( 1n<<(Adigit ^ 1n) ) ) ) & 7n;
+        return digit;
+    });
+}
+
+
+/*
+const chunks = splitNumber3BitMask(A_TEST).map((triplet, i, arr) => {
+    return BigInt(triplet) << (BigInt(arr.length - i - 1) * 3n);
+});
+*/
+const chunks = splitNumber3BitMask(A_TEST).map((triplet, i, arr) => {
+    return BigInt(triplet) << (BigInt(arr.length - i - 1) * 3n);
+});
+
+console.log( `Produced output: ${lightCompute(A_TEST).join(',')}\n` );
+console.log( `Produced MAPout: ${lightComputeMap(A_TEST).join(',')}\n` );
+
+console.log('A_TEST_SPLIT', A_TEST_SPLIT.join(','));
+
+for (const n of chunks) {
+    console.log(n.toString(), splitNumber3BitMask(n).join(','));
+}
+
+const chunksComputed = chunks.map(n => lightCompute(n));
+console.log( chunksComputed.map(data => data.join(',')) );
+
 
 
 // let OUT_DATA_TEST = lightCompute(A_TEST);
@@ -213,7 +249,7 @@ let A_split = [
 // 14: 0
 // 15: 6
 
-
+/*
 outer: for (let m = 0; m < 8; m++) {
     for (let n = 0; n < 8; n++) {
         for (let k = 0; k < 8; k++) {
@@ -228,6 +264,7 @@ outer: for (let m = 0; m < 8; m++) {
         }
     }
 }
+*/
 
 
 
