@@ -51,7 +51,7 @@ console.log( MAP.map(r => r.join('')).join('\n') + '\n' ); // debug
 // console.log(MOVES);
 
 
-const getMovableCrates = (map, x, y) {
+const getMovableCrates = (map, x, y) => {
 
 
 

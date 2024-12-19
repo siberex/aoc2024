@@ -2,6 +2,7 @@
 
 import process from 'node:process';
 import fs from 'node:fs/promises';
+import {splitNumber3BitMask, combineNumberFrom3BitMasks} from './_utils.js';
 
 const INPUT = await fs.readFile('./input/17.txt', { encoding: 'utf8' });
 
@@ -79,22 +80,76 @@ let REGISTERS = structuredClone(INIT_REGISTERS);
 let OUT_DATA = [];
 
 [REGISTERS, OUT_DATA] = machineGoBrrr(REGISTERS, INIT_DATA, printOut);
-console.log(OUT_DATA.join(',')); // part 1
+// console.log(OUT_DATA.join(',')); // part 1
+
+
+
+
+
+
+const expectedOut = strProgram.split(': ').at(1);
+const DATA_EXPECTED = expectedOut.split(',').map(Number);
+// console.log(DATA_EXPECTED);
+console.log(`Expected output: ${expectedOut}`);
 
 // Test simplified state machine:
-let A = INIT_REGISTERS[0];
-let OUT_DATA_TEST = [];
-while (A !== 0 && OUT_DATA_TEST.length < OUT_DATA.length) {
-    OUT_DATA_TEST.push(
-        ( ( ((A & 7) ^ 1) ^ 5) ^ parseInt( A / ( 1<<((A & 7) ^ 1) ) ) ) & 7
-    );
-    // This is equal to A = parseInt(A / 8), but ONLY for 32-bit integers:
-    // A >>= 3;
-    A = parseInt(A / 8);
+const A_TEST = 173440400472902;
+// const A_TEST = 214228331689724;
+
+
+
+
+function isEqual(a, b) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+        if (a.at(-i) !== b.at(-i)) return false;
+    }
+    return true;
 }
-console.log(OUT_DATA_TEST.join(','));
+
+// function equalUpToIndexLeft(a, b) {
+//     for (let i = 0; i < a.length && i < b.length; i++) {
+//         if (a.at(i) !== b.at(i)) return i;
+//     }
+//     return Math.min(a.length, b.length);
+// }
 
 
+const lightCompute = testA => {
+    let A = BigInt(testA);
+    let res = [];
+    while (A !== 0n) {
+        const digit = ( ( ((A & 7n) ^ 1n) ^ 5n) ^ ( A / ( 1n<<((A & 7n) ^ 1n) ) ) ) & 7n;
+        res.push(digit);
+        // console.log(A & 7n, digit);
+    
+        // This is equal to A = parseInt(A / 8)
+        // It will work with BigInt, but will NOT work for 64-bit integers (32-bit max dues to JS limitations):
+        A >>= 3n;
+    }
+    return res.map(Number);
+}
+
+
+
+// let OUT_DATA_TEST = lightCompute(A_TEST);
+// console.log('wtf produced', OUT_DATA_TEST.join(','));
+
+// [, OUT_DATA] = machineGoBrrr([A_TEST, 0, 0], INIT_DATA);
+// console.log(`Produced output: ${OUT_DATA.join(',')}`);
+
+// const test_n1 = A_TEST;
+// const test_split = splitNumber3BitMask(test_n1);
+// console.log(test_n1, test_split);
+// console.log(combineNumberFrom3BitMasks(test_split));
+
+
+// need: 2,4,1,1,7,5,1,5,0,3,4,3,5,5,3,0
+//  got: 4,0,7,4,1,5,4,5,2,4,0,0,1,1,3,0
+//                 ↑   ↑             ↑ ↑
+
+// WRONG approach
+/*
 const DIGITS = new Map();
 // Map from A & 7 to the output digit
 for (let A = 0; A < 100; A++) {
@@ -109,16 +164,96 @@ for (let A = 0; A < 100; A++) {
     // const OUT = ( ( ((A & 7) ^ 1) ^ 5) ^ parseInt( A / ( 1<<((A & 7) ^ 1) ) ) ) & 7;
     const OUT = B & 7;
 
-    if (!DIGITS.has(OUT)) DIGITS.set(OUT, A);
+    if (!DIGITS.has(OUT)) DIGITS.set(OUT, BigInt(A));
     // console.log(A, OUT);
 }
 
 console.log(DIGITS);
+*/
 
-const program_reversed = structuredClone(INIT_DATA).reverse();
+// const program_reversed = INIT_DATA.toReversed();
 
-console.log(program_reversed);
-console.log(INIT_DATA);
+// console.log(program_reversed);
+// console.log(INIT_DATA);
+
+
+/*
+let RES = 0n;
+INIT_DATA.forEach((digit, i) => {
+    // RES = (RES * 8) + DIGITS.get(digit);
+    // RES = RES | ( DIGITS.get(digit) << BigInt(i * 3) );
+
+    RES <<= 3n;
+
+    let aDigit = DIGITS.get(digit);
+    RES |= aDigit;
+
+    // console.log(i, RES);    
+});
+
+console.log(RES, 'TEST');
+*/
+
+
+let A_split = [
+    0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0,
+    0, 0, 7, 4
+]
+// console.log(combineNumberFrom3BitMasks(A_split));
+lightCompute(A_TEST);
+
+
+
+
+for (let m = 0; m < 8; m++) {
+    for (let n = 0; n < 8; n++) {
+        const computed = lightCompute(combineNumberFrom3BitMasks([m, n]));
+        console.log(computed, m, n);
+
+    }
+}
+
+for (let i = A_split.length - 3; i > 0; i -= 2) {
+
+    // console.log (A_split[i - 1], A_split[i]);
+
+    for (let m = 0; m < 8; m++) {
+        for (let n = 0; n < 8; n++) {
+            
+        }
+    }
+
+
+}
+
+
+//isEqual(DATA_EXPECTED, ...)
+
+
+
+process.exit();
+
+// Test example
+let test_number = 117440n;
+const test_out = [];
+while (test_number !== 0n) {
+    test_number >>= 3n;
+    test_out.push( test_number & 7n );
+}
+console.log(test_out.map(Number).join(','));
+
+const test_data = [0,3,5,4,3,0];
+const test_data_reversed = test_data.toReversed();
+
+test_number = 0n;
+test_data_reversed.forEach((digit, i) => {
+    test_number |= BigInt(digit);
+    test_number <<= 3n;
+});
+console.log(test_number);
+
+
 
 process.exit();
 
@@ -160,21 +295,26 @@ _repeat while A ≠ 0
 */
 
 
+/*
+Data: 0,3, 5,4, 3,0
+0_ADV(3): A = A // 2**3 → A = (int) A / 8
+5_OUT(4): _print A & 7
+3_JNZ(0): _repeat while A ≠ 0
+
+let RES = 0;
+[0,3, 5,4, 3,0].toReversed().forEach((digit, i) => {
+    RES = (RES * 8) + digit;
+});
+RES * 8;
+
+*/
 
 // Part 2;
 
-const expectedOut = strProgram.split(': ').at(1);
-const DATA = expectedOut.split(',').map(Number);
+// const expectedOut = strProgram.split(': ').at(1);
+// const DATA = expectedOut.split(',').map(Number);
 
-console.log(`Expected output: ${expectedOut}`);
-
-function isEqual(a, b) {
-    if (a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i++) {
-        if (a.at(-i) !== b.at(-i)) return false;
-    }
-    return true;
-}
+// console.log(`Expected output: ${expectedOut}`);
 
 
 

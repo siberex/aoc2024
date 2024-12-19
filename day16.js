@@ -323,7 +323,7 @@ shortest_path.forEach(node => {
 
 console.log(DATA.map(r => r.join('')).join('\n') + '\n'); // debug
 
-console.log(shortest_path[shortest_path.length - 1]);
+console.log(shortest_path.at(-1));
 console.log(shortest_path.length); // steps count
 console.log(score);
 
