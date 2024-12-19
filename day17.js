@@ -198,10 +198,28 @@ console.log(RES, 'TEST');
 let A_split = [
     0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0,
-    0, 0, 7, 4
+    3, 6, 7, 4
 ]
-// console.log(combineNumberFrom3BitMasks(A_split));
-lightCompute(A_TEST);
+
+outer: for (let m = 0; m < 8; m++) {
+    for (let n = 0; n < 8; n++) {
+        for (let k = 0; k < 8; k++) {
+             // 11: 2, 6, 7
+            A_split[11] = m;
+            A_split[12] = n;
+            A_split[13] = k;
+    
+            let a_test = combineNumberFrom3BitMasks(A_split);
+            console.log('?', lightCompute(a_test).join(','), m, n, k);
+
+        }
+    }
+}
+
+
+
+// console.log('?', combineNumberFrom3BitMasks(A_split));
+// console.log(lightCompute(a_test));
 
 
 
@@ -209,7 +227,7 @@ lightCompute(A_TEST);
 for (let m = 0; m < 8; m++) {
     for (let n = 0; n < 8; n++) {
         const computed = lightCompute(combineNumberFrom3BitMasks([m, n]));
-        console.log(computed, m, n);
+        // console.log(computed, m, n);
 
     }
 }
@@ -218,11 +236,6 @@ for (let i = A_split.length - 3; i > 0; i -= 2) {
 
     // console.log (A_split[i - 1], A_split[i]);
 
-    for (let m = 0; m < 8; m++) {
-        for (let n = 0; n < 8; n++) {
-            
-        }
-    }
 
 
 }
