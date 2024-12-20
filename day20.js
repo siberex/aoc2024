@@ -183,29 +183,35 @@ for (let i = 0; i < shortest_path.length - min_saving; i++) {
         total += saving;
         megacheats_tested[key] = true;
 
-        if (DEBUG) {
+        // if (DEBUG) {
             if (megacheats_savings[saving]) {
                 megacheats_savings[saving].push(key);
             } else {
                 megacheats_savings[saving] = [key];
             }
-        }
+        // }
     }
 };
 
 
 // console.log(megacheats_savings);
 
-if (DEBUG) {
+// if (DEBUG) {
+let total_checksum = 0;
     for (const saved_picos in megacheats_savings) {
         const cheatlist = megacheats_savings[saved_picos];
-        console.log(`There are ${cheatlist.length} cheats that save ${saved_picos} picoseconds.`); // debug:
+        // console.log(`There are ${cheatlist.length} cheats that save ${saved_picos} picoseconds.`); // debug:
+        if (saved_picos >= 100) {
+            total_checksum += cheatlist.length;
+        }
     }
-}
+// }
 
 // 662270746 - answer is too high
 // 646090872 - answer is too high
+// 644091669 (-1 for dist) - answer is too high
 console.log(total);
+console.log(total_checksum); // ✓ 990096
 
 
 // for (const pathId of cheats_savings[2]) {
