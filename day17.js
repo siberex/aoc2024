@@ -141,14 +141,11 @@ const lightCompute = testA => {
 const lightComputeMap = testA => {
     let A = BigInt(testA);
 
-    return splitNumber3BitMask(testA).map((n, i) => {
-        // n = A & 7
-        // const Adigit = BigInt(n);
+    return splitNumber3BitMask(testA).toReversed().map((n, i) => {
+        // const Adigit = Ai & 7n;
+        const Adigit = BigInt(n);
         const Ai = A >> (3n * BigInt(i));
-
-        console.log(i, n, Ai);
-
-        const Adigit = Ai & 7n;
+        // console.log(i, n, Ai & 7n);
         const digit = ( ( (Adigit ^ 1n) ^ 5n) ^ ( Ai / ( 1n<<(Adigit ^ 1n) ) ) ) & 7n;
         return digit;
     });
