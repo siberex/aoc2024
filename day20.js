@@ -121,7 +121,7 @@ shortest_path.forEach((node, index) => {
     }
 });
 
-// console.log(cheats_savings); // debug
+// if (DEBUG) console.log(cheats_savings); // debug
 
 let total = 0;
 for (const saved_picos in cheats_savings) {
@@ -148,16 +148,6 @@ const manhattan = (current, goal) => {
     return d1 + d2;
 }
 
-/*
-const pathMap = shortestPathCoordMap.map((row, y) => row.map((v, x) => ({
-    x,
-    y,
-    v: v === null ? '.' : 'O',
-})));
-
-console.log( printMap(shortestPathCoordMap) );
-*/
-
 // Iterate over shortest path from 0 to end, and from i to end.
 // Check how many picoseconds can be saved by circumventing the path.
 total = 0;
@@ -180,24 +170,24 @@ for (let i = 0; i < shortest_path.length - min_saving; i++) {
 
         if (saving < min_saving) continue;
 
-        total += saving;
+        total += 1;
         megacheats_tested[key] = true;
 
-        // if (DEBUG) {
+        if (DEBUG) {
             if (megacheats_savings[saving]) {
                 megacheats_savings[saving].push(key);
             } else {
                 megacheats_savings[saving] = [key];
             }
-        // }
+        }
     }
 };
 
+// if (DEBUG) console.log(megacheats_savings);
+console.log(total);
 
-// console.log(megacheats_savings);
-
-// if (DEBUG) {
-let total_checksum = 0;
+if (DEBUG) {
+    let total_checksum = 0;
     for (const saved_picos in megacheats_savings) {
         const cheatlist = megacheats_savings[saved_picos];
         // console.log(`There are ${cheatlist.length} cheats that save ${saved_picos} picoseconds.`); // debug:
@@ -205,21 +195,11 @@ let total_checksum = 0;
             total_checksum += cheatlist.length;
         }
     }
-// }
-
-// 662270746 - answer is too high
-// 646090872 - answer is too high
-// 644091669 (-1 for dist) - answer is too high
-console.log(total);
-console.log(total_checksum); // ✓ 990096
+    // console.log(total_checksum); // ✓ 990096
+}
 
 
 // for (const pathId of cheats_savings[2]) {
 //     console.log(pathId);
 // }
 // console.log( printMap(MAP) + '\n' ); // debug
-
-
-    // if (saved_picos >= 50) {
-    //     console.log(`There are ${cheatlist.length} cheats that save ${saved_picos} picoseconds.`);
-    // }
