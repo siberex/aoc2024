@@ -151,6 +151,42 @@ const lightComputeMap = testA => {
     });
 }
 
+/*
+let X = A & 7:
+Output digit = (X^1^5) ^ (A//2**(X^1))
+X   X^1     X^1^5   2**(X^1)    A//2**(X^1)      (X^1^5) ^ (A//2**(X^1))
+0   1       4         2         A >> 1              (A >> 1) ^ 4
+1   0       5         1         A >> 0              A ^ 5
+2   3       6         8         A >> 3              (A >> 3) ^ 6
+3   2       7         4         A >> 2              (A >> 2) ^ 7
+4   5       0        32         A >> 5              A >> 5
+5   4       1        16         A >> 4              (A >> 4) ^ 1
+6   7       2       128         A >> 7              (A >> 7) ^ 2
+7   6       3        64         A >> 6              (A >> 6) ^ 3
+*/
+const simplifiedComputeMap = A => {
+    let out = [];
+    while (A !== 0) {
+        const X = A & 7;
+        let R = X;
+        switch(X) {
+            case 0: R = (A >> 1) ^ 4; break;
+            case 1: R = A ^ 5; break;
+            case 2: R = (A >> 3) ^ 6; break;
+            case 3: R = (A >> 2) ^ 7; break;
+            case 4: R = A >> 5; break;
+            case 5: R = (A >> 4) ^ 1; break;
+            case 6: R = (A >> 7) ^ 2; break;
+            case 7: R = (A >> 6) ^ 3; break;
+        }
+        out.push(R & 7);
+        A >>= 3;
+    }
+    return out;
+}
+
+
+
 
 /*
 const chunks = splitNumber3BitMask(A_TEST).map((triplet, i, arr) => {
@@ -163,6 +199,7 @@ const chunks = splitNumber3BitMask(A_TEST).map((triplet, i, arr) => {
 
 console.log( `Produced output: ${lightCompute(A_TEST).join(',')}\n` );
 console.log( `Produced MAPout: ${lightComputeMap(A_TEST).join(',')}\n` );
+console.log( `Produced SIMout: ${simplifiedComputeMap(A_TEST).join(',')}\n` );
 
 console.log('A_TEST_SPLIT', A_TEST_SPLIT.join(','));
 
@@ -351,6 +388,29 @@ _repeat while A ≠ 0
 _print ( ( ((A & 7) ^ 1) ^ 5) ^ parseInt( A / 2**((A & 7) ^ 1) ) ) & 7
 A >>= 3
 _repeat while A ≠ 0
+
+
+(A & 7) ^ 1) ^ 5) - ?
+2 ** ((A & 7) ^ 1) - ?
+
+
+let X = A & 7:
+Output digit = (X^1^5) ^ (A//2**(X^1))
+X   X^1     X^1^5   2**(X^1)    A//2**(X^1)      (X^1^5) ^ (A//2**(X^1))
+0   1       4         2         A >> 1              (A >> 1) ^ 4
+1   0       5         1         A >> 0              A ^ 5
+2   3       6         8         A >> 3              (A >> 3) ^ 6
+3   2       7         4         A >> 2              (A >> 2) ^ 7
+4   5       0        32         A >> 5              A >> 5
+5   4       1        16         A >> 4              (A >> 4) ^ 1
+6   7       2       128         A >> 7              (A >> 7) ^ 2
+7   6       3        64         A >> 6              (A >> 6) ^ 3
+
+
+
+
+
+
 */
 
 
