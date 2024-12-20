@@ -5,7 +5,9 @@ import fs from 'node:fs/promises';
 import AStar from './_astar.js';
 // import {permutator} from './_utils.js';
 
-const INPUT = await fs.readFile('./input/20.txt', { encoding: 'utf8' });
+const DEBUG = false;
+const input_filename = DEBUG ? './input/20.test' : './input/20.txt';
+const INPUT = await fs.readFile(input_filename, { encoding: 'utf8' });
 
 const MAP = INPUT.split('\n').map(row => row.split(''));
 
@@ -92,6 +94,7 @@ const cheats_savings = {};
 // Starting point should be included
 shortest_path.unshift(MAP_converted[START_Y][START_X]);
 
+// FIXME: generalize from part 2
 shortest_path.forEach((node, index) => {
     let adj_walls = getAdjacentWalls(node, MAP_converted);
     for (const wall of adj_walls) {
@@ -133,7 +136,7 @@ for (const saved_picos in cheats_savings) {
 console.log(total);
 
 // Part 2:
-const min_saving = 50;
+const min_saving = DEBUG ? 50 : 100;
 const megacheats_tested = {};
 const megacheats_savings = {};
 
@@ -162,13 +165,15 @@ total = 0;
 for (let i = 0; i < shortest_path.length; i++) {
 
     /// start from i + min_saving ?
-    for (let j = i + 1; j < shortest_path.length; j++) {
+    for (let j = i + min_saving + 1; j < shortest_path.length; j++) {
         const key = `${i}_${j}`;
         if (megacheats_tested[key]) continue;
 
         // manhattan distance
         const dist = manhattan(shortest_path[i], shortest_path[j]);
+        if (dist === 0) continue; // skip same node
 
+        // up to 20 picoseconds are allowed
         if (dist > 20) continue;
 
         const saving = (j - i - dist);
@@ -177,23 +182,29 @@ for (let i = 0; i < shortest_path.length; i++) {
 
         total += saving;
         megacheats_tested[key] = true;
-        if (megacheats_savings[saving]) {
-            megacheats_savings[saving].push(key);
-        } else {
-            megacheats_savings[saving] = [key];
+
+        if (DEBUG) {
+            if (megacheats_savings[saving]) {
+                megacheats_savings[saving].push(key);
+            } else {
+                megacheats_savings[saving] = [key];
+            }
         }
     }
 };
 
 
 // console.log(megacheats_savings);
-for (const saved_picos in megacheats_savings) {
-    const cheatlist = megacheats_savings[saved_picos];
-    // Debug:
-    console.log(`There are ${cheatlist.length} cheats that save ${saved_picos} picoseconds.`);    
+
+if (DEBUG) {
+    for (const saved_picos in megacheats_savings) {
+        const cheatlist = megacheats_savings[saved_picos];
+        console.log(`There are ${cheatlist.length} cheats that save ${saved_picos} picoseconds.`); // debug:
+    }
 }
 
 // 662270746 - answer is too high
+// 646090872 - answer is too high
 console.log(total);
 
 
