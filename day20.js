@@ -5,7 +5,7 @@ import fs from 'node:fs/promises';
 import AStar from './_astar.js';
 // import {permutator} from './_utils.js';
 
-const INPUT = await fs.readFile('./input/20.test', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/20.txt', { encoding: 'utf8' });
 
 const MAP = INPUT.split('\n').map(row => row.split(''));
 
@@ -134,7 +134,8 @@ console.log(total);
 
 // Part 2:
 const min_saving = 50;
-const mega_savings = {};
+const megacheats_tested = {};
+const megacheats_savings = {};
 
 const manhattan = (current, goal) => {
     let d1 = goal.x - current.x;
@@ -160,9 +161,10 @@ total = 0;
 
 for (let i = 0; i < shortest_path.length; i++) {
 
-    for (let j = i + min_saving; j < shortest_path.length; j++) {
+    /// start from i + min_saving ?
+    for (let j = i + 1; j < shortest_path.length; j++) {
         const key = `${i}_${j}`;
-        if (mega_savings[key]) continue;
+        if (megacheats_tested[key]) continue;
 
         // manhattan distance
         const dist = manhattan(shortest_path[i], shortest_path[j]);
@@ -171,14 +173,27 @@ for (let i = 0; i < shortest_path.length; i++) {
 
         const saving = (j - i - dist);
 
-        total += saving;
+        if (saving < min_saving) continue;
 
-        mega_savings[key] = saving;
+        total += saving;
+        megacheats_tested[key] = true;
+        if (megacheats_savings[saving]) {
+            megacheats_savings[saving].push(key);
+        } else {
+            megacheats_savings[saving] = [key];
+        }
     }
 };
 
 
-console.log(mega_savings);
+// console.log(megacheats_savings);
+for (const saved_picos in megacheats_savings) {
+    const cheatlist = megacheats_savings[saved_picos];
+    // Debug:
+    console.log(`There are ${cheatlist.length} cheats that save ${saved_picos} picoseconds.`);    
+}
+
+// 662270746 - answer is too high
 console.log(total);
 
 
