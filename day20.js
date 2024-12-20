@@ -5,7 +5,7 @@ import fs from 'node:fs/promises';
 import AStar from './_astar.js';
 // import {permutator} from './_utils.js';
 
-const INPUT = await fs.readFile('./input/20.txt', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/20.test', { encoding: 'utf8' });
 
 const MAP = INPUT.split('\n').map(row => row.split(''));
 
@@ -106,14 +106,14 @@ shortest_path.forEach((node, index) => {
     let adj_walls = getAdjacentWalls(node, MAP_converted);
     let picoseconds = 1;
 
-    // while(picoseconds < 2) {
+    while(picoseconds < 2) {
 
         for (const wall of adj_walls) {
-
             const nextPathIndexes = getAdjacent(wall, coordMap).filter(i => i > index);
 
             for (const exitIndex of nextPathIndexes) {
-
+                // Step into the wall and step out = two steps, subtract them from savings
+                // Note on the Part2: eliminated walls count should be subtracted
                 const saved_picos = exitIndex - index - 2;
                 if (saved_picos <= 0) continue;
 
@@ -125,104 +125,14 @@ shortest_path.forEach((node, index) => {
                     cheats_savings[saved_picos] = [key];
                 }
             }
-            
-
         }
 
-        // picoseconds++;
-    // }
-
-
-
+        picoseconds++;
+    }
 
 });
 
 
-/*
-for (let x = 1; x < WIDTH - 1; x++) {
-    for (let y = 1; y < HEIGHT - 1; y++) {
-        if (MAP[y][x] !== '#') continue;
-
-        const disabled1 = MAP_converted[y][x];
-        const disabled2_list = getAdjacent(disabled1, MAP_converted).filter(w => getAdjacentNonWalls(w, MAP_converted ).length !== 0);
-        for (const disabled2 of disabled2_list) {
-            const k = getPosHash(disabled1, disabled2);
-            if (cheats_tested[k]) continue;
-            const k_rev = getPosHash(disabled2, disabled1);
-            if (cheats_tested[k_rev]) continue;
-
-            cheats_tested[k] = 1;
-
-            const MAP_TEST = structuredClone(MAP);
-            MAP_TEST[disabled1.y][disabled1.x] = '.';
-            MAP_TEST[disabled2.y][disabled2.x] = '.';
-            const MAP_TEST_converted = convertMap(MAP_TEST);
-
-            const astar = new AStar(MAP_TEST_converted);
-            let new_shortest_path = astar.search(MAP_TEST_converted[START_Y][START_X], MAP_TEST_converted[END_Y][END_X]);
-
-            if (new_shortest_path.length < shortest_path.length) {
-                const saved_picos = shortest_path.length - new_shortest_path.length;
-                if (cheats_savings[saved_picos]) {
-                    cheats_savings[saved_picos].push(k);
-                } else {
-                    cheats_savings[saved_picos] = [k];
-                }
-
-                // console.log(shortest_path.length - new_shortest_path.length);
-            }
-
-
-        }
-
-    }
-}
-*/
-
-/*
-shortest_path.forEach((node, ind) => {
-    if (node.Y === START_Y && node.x === START_X) return;
-    if (node.y === END_Y   && node.x === END_X) return;
-
-    const adj_walls = getAdjacentWalls(node, MAP_converted);
-    // console.log(adj_walls.length)
-
-    for (const wall_node of adj_walls) {
-        const adj_walls_2 = getAdjacentWalls(wall_node, MAP_converted).filter(w => getAdjacentNonWalls(w, MAP_converted ).length !== 0)
-        for (const wall_node_2 of adj_walls_2) {
-
-            const k = getPosHash(wall_node, wall_node_2);
-            if (cheats_tested[k]) continue;
-
-            const k_rev = getPosHash(wall_node_2, wall_node);
-            if (cheats_tested[k_rev]) continue;
-
-            cheats_tested[k] = 1;
-
-            const MAP_TEST = structuredClone(MAP);
-            MAP_TEST[wall_node.y][wall_node.x] = '.';
-            MAP_TEST[wall_node_2.y][wall_node_2.x] = '.';
-            const MAP_TEST_converted = convertMap(MAP_TEST);
-
-            const astar = new AStar(MAP_TEST_converted);
-            let new_shortest_path = astar.search(MAP_TEST_converted[START_Y][START_X], MAP_TEST_converted[END_Y][END_X]);
-
-            if (new_shortest_path.length < shortest_path.length) {
-                const saved_picos = shortest_path.length - new_shortest_path.length;
-                if (cheats_savings[saved_picos]) {
-                    cheats_savings[saved_picos] += 1;
-                } else {
-                    cheats_savings[saved_picos] = 1;
-                }
-
-                // console.log(shortest_path.length - new_shortest_path.length);
-            }
-        }
-    }
-
-    return;    
-});
-*/
 
 // console.log(cheats);
 // console.log(cheats_savings);
@@ -230,6 +140,11 @@ shortest_path.forEach((node, ind) => {
 let total = 0;
 for (const saved_picos in cheats_savings) {
     const cheatlist = cheats_savings[saved_picos];
+
+    // if (saved_picos >= 50) {
+        console.log(`There are ${cheatlist.length} cheats that save ${saved_picos} picoseconds.`);
+    // }
+
     if (saved_picos >= 100) {
         total += cheatlist.length;
     }
