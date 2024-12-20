@@ -12,7 +12,7 @@ class AStar {
     constructor(grid, heuristic, gScore, onStep, isWall) {
         this.heuristic = heuristic === undefined ? this.manhattan : heuristic;
         this.gScore = gScore === undefined ? (current, adjacent) => current.g + 1 : gScore;
-        this.onStep = onStep === undefined ? () => {} : onStep;
+        this.onStep = onStep === undefined ? (current, adjacent) => {} : onStep;
         this.isWall = isWall === undefined ? (node => node.v === '#') : isWall;
 
         // Enrich frid nodes with some additional fields
@@ -111,7 +111,7 @@ class AStar {
                     neighbor.g = gScore;
                     neighbor.f = neighbor.g + neighbor.h;
 
-                    this.onStep(neighbor);
+                    this.onStep(currentNode, neighbor);
                     
                     if (!beenVisited) {
                         // Pushing to heap will put it in proper place based on the 'f' value.
