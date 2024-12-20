@@ -5,7 +5,7 @@ import fs from 'node:fs/promises';
 import AStar from './_astar.js';
 // import {permutator} from './_utils.js';
 
-const INPUT = await fs.readFile('./input/20.test', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/20.txt', { encoding: 'utf8' });
 
 const MAP = INPUT.split('\n').map(row => row.split(''));
 
@@ -60,12 +60,12 @@ const MAP_converted = convertMap(MAP);
 
 const [START_X, START_Y] = getFirstPos(MAP, 'S');
 const [END_X, END_Y] = getFirstPos(MAP, 'E');
-console.log([START_X, START_Y], [END_X, END_Y]); // debug
+// console.log([START_X, START_Y], [END_X, END_Y]); // debug
 
 const astar = new AStar(MAP_converted);
 const shortest_path = astar.search(MAP_converted[START_Y][START_X], MAP_converted[END_Y][END_X]);
 
-console.log(shortest_path.length);
+// console.log(shortest_path.length);
 
 
 const getPosHash = (node1, node2) => {
@@ -84,11 +84,13 @@ const getPosHash = (node1, node2) => {
 const coordMap = Array(HEIGHT).fill(null, 0, HEIGHT).map(v => Array(WIDTH).fill(0, 0, WIDTH));
 shortest_path.forEach((node, index) => {
     coordMap[node.y][node.x] = index;
+
+    // This is only to print map, could be removed:
     if (node.Y === START_Y && node.x === START_X) return;
     if (node.y === END_Y   && node.x === END_X) return;
     MAP[node.y][node.x] = '+';
 });
-console.log( printMap(MAP) + '\n' ); // debug
+// console.log( printMap(MAP) + '\n' ); // debug
 
 
 
@@ -99,7 +101,12 @@ const cheats_savings = {};
 
 
 
+function getPathsUpToDepth() {
 
+}
+
+// Starting point should be included
+shortest_path.unshift(MAP_converted[START_Y][START_X]);
 
 shortest_path.forEach((node, index) => {
 
@@ -112,12 +119,17 @@ shortest_path.forEach((node, index) => {
             const nextPathIndexes = getAdjacent(wall, coordMap).filter(i => i > index);
 
             for (const exitIndex of nextPathIndexes) {
-                // Step into the wall and step out = two steps, subtract them from savings
-                // Note on the Part2: eliminated walls count should be subtracted
-                const saved_picos = exitIndex - index - 2;
+                // Step into the wall should be subtracted them from savings
+                const saved_picos = exitIndex - index - 1;
                 if (saved_picos <= 0) continue;
 
+                // if (saved_picos === 4) {
+                //     MAP[wall.y][wall.x] = 'C';
+                // }
+
+
                 const key = `${index}_${exitIndex}`;
+                cheats_tested[key] = true;
 
                 if (cheats_savings[saved_picos]) {
                     cheats_savings[saved_picos].push(key);
@@ -133,6 +145,11 @@ shortest_path.forEach((node, index) => {
 });
 
 
+// Part 2:
+// Iterate over shortest path from 0 to end, and from i to end.
+// Check how many picoseconds can be saved by circumventing the path.
+shortest_path.forEach((node, index) => {});
+
 
 // console.log(cheats);
 // console.log(cheats_savings);
@@ -142,7 +159,7 @@ for (const saved_picos in cheats_savings) {
     const cheatlist = cheats_savings[saved_picos];
 
     // if (saved_picos >= 50) {
-        console.log(`There are ${cheatlist.length} cheats that save ${saved_picos} picoseconds.`);
+    //     console.log(`There are ${cheatlist.length} cheats that save ${saved_picos} picoseconds.`);
     // }
 
     if (saved_picos >= 100) {
@@ -151,3 +168,9 @@ for (const saved_picos in cheats_savings) {
 }
 
 console.log(total);
+
+
+// for (const pathId of cheats_savings[2]) {
+//     console.log(pathId);
+// }
+// console.log( printMap(MAP) + '\n' ); // debug
