@@ -5,7 +5,7 @@ import fs from 'node:fs/promises';
 import AStar from './_astar.js';
 // import {permutator} from './_utils.js';
 
-const INPUT = await fs.readFile('./input/20.txt', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/20.test', { encoding: 'utf8' });
 
 const MAP = INPUT.split('\n').map(row => row.split(''));
 
@@ -68,22 +68,11 @@ const shortest_path = astar.search(MAP_converted[START_Y][START_X], MAP_converte
 // console.log(shortest_path.length);
 
 
-const getPosHash = (node1, node2) => {
-    if (node1.v === '#' && node2.v === '#')
-        return `${node1.x.toString()},${node1.y.toString()}_${node2.x.toString()},${node2.y.toString()}`;
-    if (node1.v === '#')
-        return `${node1.x.toString()},${node1.y.toString()}`;
-    if (node2.v === '#')
-        return `${node2.x.toString()},${node2.y.toString()}`;
-    return 'UNDEFINED';
-}
-
-
 
 // This is needed to check coords later
-const coordMap = Array(HEIGHT).fill(null, 0, HEIGHT).map(v => Array(WIDTH).fill(0, 0, WIDTH));
+const shortestPathCoordMap = Array(HEIGHT).fill(null, 0, HEIGHT).map(v => Array(WIDTH).fill(0, 0, WIDTH));
 shortest_path.forEach((node, index) => {
-    coordMap[node.y][node.x] = index;
+    shortestPathCoordMap[node.y][node.x] = index;
 
     // This is only to print map, could be removed:
     if (node.Y === START_Y && node.x === START_X) return;
@@ -99,69 +88,43 @@ shortest_path.forEach((node, index) => {
 const cheats_tested = {};
 const cheats_savings = {};
 
-
-
-function getPathsUpToDepth() {
-
-}
-
+// Part 1:
 // Starting point should be included
 shortest_path.unshift(MAP_converted[START_Y][START_X]);
 
 shortest_path.forEach((node, index) => {
-
     let adj_walls = getAdjacentWalls(node, MAP_converted);
-    let picoseconds = 1;
+    for (const wall of adj_walls) {
+        const nextPathIndexes = getAdjacent(wall, shortestPathCoordMap).filter(i => i > index);
 
-    while(picoseconds < 2) {
+        for (const exitIndex of nextPathIndexes) {
+            // Step into the wall should be subtracted them from savings
+            const saved_picos = exitIndex - index - 1;
+            if (saved_picos <= 0) continue;
 
-        for (const wall of adj_walls) {
-            const nextPathIndexes = getAdjacent(wall, coordMap).filter(i => i > index);
+            // if (saved_picos === 4) {
+            //     MAP[wall.y][wall.x] = 'C'; // debug
+            // }
 
-            for (const exitIndex of nextPathIndexes) {
-                // Step into the wall should be subtracted them from savings
-                const saved_picos = exitIndex - index - 1;
-                if (saved_picos <= 0) continue;
+            const key = `${index}_${exitIndex}`;
+            cheats_tested[key] = true;
 
-                // if (saved_picos === 4) {
-                //     MAP[wall.y][wall.x] = 'C';
-                // }
-
-
-                const key = `${index}_${exitIndex}`;
-                cheats_tested[key] = true;
-
-                if (cheats_savings[saved_picos]) {
-                    cheats_savings[saved_picos].push(key);
-                } else {
-                    cheats_savings[saved_picos] = [key];
-                }
+            if (cheats_savings[saved_picos]) {
+                cheats_savings[saved_picos].push(key);
+            } else {
+                cheats_savings[saved_picos] = [key];
             }
         }
-
-        picoseconds++;
     }
-
 });
 
-
-// Part 2:
-// Iterate over shortest path from 0 to end, and from i to end.
-// Check how many picoseconds can be saved by circumventing the path.
-shortest_path.forEach((node, index) => {});
-
-
-// console.log(cheats);
-// console.log(cheats_savings);
+// console.log(cheats_savings); // debug
 
 let total = 0;
 for (const saved_picos in cheats_savings) {
     const cheatlist = cheats_savings[saved_picos];
-
-    // if (saved_picos >= 50) {
-    //     console.log(`There are ${cheatlist.length} cheats that save ${saved_picos} picoseconds.`);
-    // }
-
+    // Debug:
+    // console.log(`There are ${cheatlist.length} cheats that save ${saved_picos} picoseconds.`);
     if (saved_picos >= 100) {
         total += cheatlist.length;
     }
@@ -169,8 +132,62 @@ for (const saved_picos in cheats_savings) {
 
 console.log(total);
 
+// Part 2:
+const min_saving = 50;
+const mega_savings = {};
+
+const manhattan = (current, goal) => {
+    let d1 = goal.x - current.x;
+    if (d1 < 0) d1 = -d1; // eq. Math.abs();
+    let d2 = goal.y - current.y;
+    if (d2 < 0) d2 = -d2;
+    return d1 + d2;
+}
+
+/*
+const pathMap = shortestPathCoordMap.map((row, y) => row.map((v, x) => ({
+    x,
+    y,
+    v: v === null ? '.' : 'O',
+})));
+
+console.log( printMap(shortestPathCoordMap) );
+*/
+
+// Iterate over shortest path from 0 to end, and from i to end.
+// Check how many picoseconds can be saved by circumventing the path.
+total = 0;
+
+for (let i = 0; i < shortest_path.length; i++) {
+
+    for (let j = i + min_saving; j < shortest_path.length; j++) {
+        const key = `${i}_${j}`;
+        if (mega_savings[key]) continue;
+
+        // manhattan distance
+        const dist = manhattan(shortest_path[i], shortest_path[j]);
+
+        if (dist > 20) continue;
+
+        const saving = (j - i - dist);
+
+        total += saving;
+
+        mega_savings[key] = saving;
+    }
+};
+
+
+console.log(mega_savings);
+console.log(total);
+
 
 // for (const pathId of cheats_savings[2]) {
 //     console.log(pathId);
 // }
 // console.log( printMap(MAP) + '\n' ); // debug
+
+
+    // if (saved_picos >= 50) {
+    //     console.log(`There are ${cheatlist.length} cheats that save ${saved_picos} picoseconds.`);
+    // }

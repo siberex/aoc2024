@@ -39,9 +39,9 @@ class AStar {
     heuristic(current, goal) {
         // See list of heuristics: http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
 
-        const d1 = goal.x - current.x;
+        let d1 = goal.x - current.x;
         if (d1 < 0) d1 = -d1; // eq. Math.abs();
-        const d2 = goal.y - current.y;
+        let d2 = goal.y - current.y;
         if (d2 < 0) d2 = -d2;
         return d1 + d2;
     } // manhattan
