@@ -5,7 +5,7 @@ import fs from 'node:fs/promises';
 import AStar from './_astar.js';
 // import {permutator} from './_utils.js';
 
-const INPUT = await fs.readFile('./input/20.test', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/20.txt', { encoding: 'utf8' });
 
 const MAP = INPUT.split('\n').map(row => row.split(''));
 
@@ -110,8 +110,13 @@ shortest_path.forEach((node, index) => {
 
         for (const wall of adj_walls) {
 
-            for (const exitIndex of getAdjacent(wall, coordMap).filter(i => i > index)) {
-                const saved_picos = exitIndex - index;
+            const nextPathIndexes = getAdjacent(wall, coordMap).filter(i => i > index);
+
+            for (const exitIndex of nextPathIndexes) {
+
+                const saved_picos = exitIndex - index - 2;
+                if (saved_picos <= 0) continue;
+
                 const key = `${index}_${exitIndex}`;
 
                 if (cheats_savings[saved_picos]) {
@@ -220,4 +225,14 @@ shortest_path.forEach((node, ind) => {
 */
 
 // console.log(cheats);
-console.log(cheats_savings);
+// console.log(cheats_savings);
+
+let total = 0;
+for (const saved_picos in cheats_savings) {
+    const cheatlist = cheats_savings[saved_picos];
+    if (saved_picos >= 100) {
+        total += cheatlist.length;
+    }
+}
+
+console.log(total);
