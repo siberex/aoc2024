@@ -41,11 +41,16 @@ const [END_X, END_Y] = getFirstPos(MAP, 'E');
 console.log([START_X, START_Y], [END_X, END_Y]); // debug
 
 const astar = new AStar(MAP_converted);
-let shortest_path = astar.search(MAP_converted[START_X][START_Y], MAP_converted[END_X][END_Y]);
+let shortest_path = astar.search(MAP_converted[START_Y][START_X], MAP_converted[END_Y][END_X]);
 
 console.log(shortest_path.length);
 
 for (const node of shortest_path) {
+    if (node.Y === START_Y && node.x === START_X) continue;
+    if (node.y === END_Y   && node.x === END_X) continue;
     MAP[node.y][node.x] = 'o';
 }
+
 console.log( printMap(MAP) + '\n' ); // debug
+
+
