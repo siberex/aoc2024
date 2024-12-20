@@ -86,7 +86,7 @@ export const permutator = (inputArr) => {
 
 
 // Number permutations
-function generatePermutations(n, base) {
+export function generatePermutations(n, base, toInt) {
     if (!base) base = 2;
     const digit = (base - 1).toString();
   
@@ -97,7 +97,8 @@ function generatePermutations(n, base) {
     // For every int between 0 and max integer of that base
     for (let i = 0; i <= maxN; i++) {
         // Convert to binary, pad with 0, and push to the result
-        states.push( i.toString(base).padStart(n, '0').split('') );
+        const state = i.toString(base).padStart(n, '0').split('');
+        states.push( toInt ? state.map(Number) : state );
     }
   
     return states;

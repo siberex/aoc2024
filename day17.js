@@ -2,7 +2,7 @@
 
 import process from 'node:process';
 import fs from 'node:fs/promises';
-import {splitNumber3BitMask, combineNumberFrom3BitMasks} from './_utils.js';
+import {splitNumber3BitMask, combineNumberFrom3BitMasks, generatePermutations} from './_utils.js';
 
 const INPUT = await fs.readFile('./input/17.txt', { encoding: 'utf8' });
 
@@ -115,6 +115,15 @@ function isEqual(a, b) {
     return true;
 }
 
+function countEqual(a, b, reverse, stopOnFirstInequal) {
+    let count = 0;
+    for (let i = 0; i < a.length; i++) {
+        if (a.at(reverse ? -i : i) === b.at(reverse ? -i: i)) count++;
+        else if (stopOnFirstInequal) return count;
+    }
+    return count;
+}
+
 // function equalUpToIndexLeft(a, b) {
 //     for (let i = 0; i < a.length && i < b.length; i++) {
 //         if (a.at(i) !== b.at(i)) return i;
@@ -164,23 +173,24 @@ X   X^1     X^1^5   2**(X^1)    A//2**(X^1)      (X^1^5) ^ (A//2**(X^1))
 6   7       2       128         A >> 7              (A >> 7) ^ 2
 7   6       3        64         A >> 6              (A >> 6) ^ 3
 */
-const simplifiedComputeMap = A => {
+const simplifiedComputeMap = testA => {
+    let A = BigInt(testA);
     let out = [];
-    while (A !== 0) {
-        const X = A & 7;
+    while (A !== 0n) {
+        const X = A & 7n;
         let R = X;
         switch(X) {
-            case 0: R = (A >> 1) ^ 4; break;
-            case 1: R = A ^ 5; break;
-            case 2: R = (A >> 3) ^ 6; break;
-            case 3: R = (A >> 2) ^ 7; break;
-            case 4: R = A >> 5; break;
-            case 5: R = (A >> 4) ^ 1; break;
-            case 6: R = (A >> 7) ^ 2; break;
-            case 7: R = (A >> 6) ^ 3; break;
+            case 0n: R = (A >> 1n) ^ 4n; break;
+            case 1n: R = A ^ 5n; break;
+            case 2n: R = (A >> 3n) ^ 6n; break;
+            case 3n: R = (A >> 2n) ^ 7n; break;
+            case 4n: R = A >> 5n; break;
+            case 5n: R = (A >> 4n) ^ 1n; break;
+            case 6n: R = (A >> 7n) ^ 2n; break;
+            case 7n: R = (A >> 6n) ^ 3n; break;
         }
-        out.push(R & 7);
-        A >>= 3;
+        out.push(Number(R & 7n));
+        A >>= 3n;
     }
     return out;
 }
@@ -197,18 +207,95 @@ const chunks = splitNumber3BitMask(A_TEST).map((triplet, i, arr) => {
     return BigInt(triplet) << (BigInt(arr.length - i - 1) * 3n);
 });
 
-console.log( `Produced output: ${lightCompute(A_TEST).join(',')}\n` );
-console.log( `Produced MAPout: ${lightComputeMap(A_TEST).join(',')}\n` );
-console.log( `Produced SIMout: ${simplifiedComputeMap(A_TEST).join(',')}\n` );
+// console.log( `Produced output: ${lightCompute(A_TEST).join(',')}\n` );
+// console.log( `Produced MAPout: ${lightComputeMap(A_TEST).join(',')}\n` );
+// console.log( `Produced SIMout: ${simplifiedComputeMap(A_TEST).join(',')}\n` );
 
-console.log('A_TEST_SPLIT', A_TEST_SPLIT.join(','));
+// console.log( '___A_TEST_SPLIT:', A_TEST_SPLIT.join(','));
 
-for (const n of chunks) {
-    console.log(n.toString(), splitNumber3BitMask(n).join(','));
+
+let A_inc = 223147667058365;
+//  A_inc = 163645190139581;
+//  A_inc = 163091139358397;
+A_inc =     164542125272765;
+console.log( `Produced output: ${simplifiedComputeMap(A_inc).join(',')}` );
+
+// console.log( countEqual(DATA_EXPECTED, simplifiedComputeMap(A_TEST)) ); // 4
+// console.log( countEqual(DATA_EXPECTED, simplifiedComputeMap(A_inc)) ); // 8
+
+let A_inc_split = splitNumber3BitMask(A_inc);
+// console.log(A_inc_split);
+// A_inc_split[0] = 7;
+// A_inc_split[1] = 3;
+// console.log(A_inc_split);
+// A_inc = combineNumberFrom3BitMasks(A_inc_split);
+
+// console.log( `Produced output: ${simplifiedComputeMap(A_inc).join(',')}` );
+
+/*
+let triggerStop = 0;
+let countDigits = countEqual(DATA_EXPECTED, simplifiedComputeMap(A_inc));
+while(A_inc <= 281474976710654) {
+    A_inc++;
+
+    const cnt = countEqual(DATA_EXPECTED, simplifiedComputeMap(A_inc));
+    if (cnt > countDigits) {
+        countDigits = cnt;
+        console.log(cnt, A_inc);
+    }
+
+    triggerStop++;
+}
+*/
+
+const permutationSize = 3;
+let countDigits = countEqual(DATA_EXPECTED, simplifiedComputeMap(A_inc));
+for (const permutation of generatePermutations(permutationSize, 8, true)) {
+    A_inc_split.splice(1, permutationSize, ...permutation);
+    A_inc = combineNumberFrom3BitMasks(A_inc_split);
+    
+    const cnt = countEqual(DATA_EXPECTED, simplifiedComputeMap(A_inc));
+    // const cnt = countEqual(DATA_EXPECTED, lightCompute(A_inc));
+    if (cnt > countDigits) {
+        countDigits = cnt;
+        console.log(cnt, A_inc);
+    }
 }
 
-const chunksComputed = chunks.map(n => lightCompute(n));
-console.log( chunksComputed.map(data => data.join(',')) );
+
+/*
+                           .   .             . .
+Expected output: 2,4,1,1,7,5,1,5,0,3,4,3,5,5,3,0
+Produced output: 4,0,7,4,1,5,4,5,2,4,0,0,1,1,3,0
+
+                 . . . . . . .     .
+Expected output: 2,4,1,1,7,5,1,5,0,3,4,3,5,5,3,0
+Produce2 SIMout: 2,4,1,1,7,5,1,7,4,3,5,4,1,0,0,2
+
+                 . . . . . . . . . .
+Expected output: 2,4,1,1,7,5,1,5,0,3,4,3,5,5,3,0
+Produced output: 2,4,1,1,7,5,1,5,0,3,5,4,0,4,1,3
+
+
+163091139358397:
+                 . . . . . . . . . . . . .   . .
+Expected output: 2,4,1,1,7,5,1,5,0,3,4,3,5,5,3,0
+Produced output: 2,4,1,1,7,5,1,5,0,3,4,3,5,0,3,0
+
+163645190139581:
+                 . . . . . . . . . . . . .   . .
+Expected output: 2,4,1,1,7,5,1,5,0,3,4,3,5,5,3,0
+Produced output: 2,4,1,1,7,5,1,5,0,3,4,3,5,4,3,0
+
+*/
+
+
+// for (const n of chunks) {
+//     console.log(n.toString(), splitNumber3BitMask(n).join(','));
+// }
+
+// const chunksComputed = chunks.map(n => lightCompute(n));
+// console.log( chunksComputed.map(data => data.join(',')) );
 
 
 
