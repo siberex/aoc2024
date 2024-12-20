@@ -162,7 +162,7 @@ console.log( printMap(shortestPathCoordMap) );
 // Check how many picoseconds can be saved by circumventing the path.
 total = 0;
 
-for (let i = 0; i < shortest_path.length; i++) {
+for (let i = 0; i < shortest_path.length - min_saving; i++) {
 
     /// start from i + min_saving ?
     for (let j = i + min_saving + 1; j < shortest_path.length; j++) {
