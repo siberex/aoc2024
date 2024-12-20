@@ -11,8 +11,8 @@ const MAP = INPUT.split('\n').map(row => row.split(''));
 
 const MEMO = new Map();
 
-const WIDTH = MAP.length;
-const HEIGHT = MAP[0]?.length;
+const HEIGHT = MAP.length;
+const WIDTH = MAP[0]?.length;
 
 const getFirstPos = (map, value) => {
     let x = -1;
@@ -23,30 +23,26 @@ const getFirstPos = (map, value) => {
     return [x, y];
 }
 
-// Get all adjacent walls
-const getAdjacentWalls = (node, grid) => {
-    let adjacent = [];
+const getAdjacent = (node, grid) => {
+    const adjacent = [];
     const x = node.x;
     const y = node.y;
 
-    if (grid[y - 1] && grid[y - 1][x] && grid[y - 1][x].v === '#') adjacent.push(grid[y - 1][x]);
-    if (grid[y + 1] && grid[y + 1][x] && grid[y + 1][x].v === '#') adjacent.push(grid[y + 1][x]);
-    if (grid[y]     && grid[y][x - 1] && grid[y][x - 1].v === '#') adjacent.push(grid[y][x - 1]);
-    if (grid[y]     && grid[y][x + 1] && grid[y][x + 1].v === '#') adjacent.push(grid[y][x + 1]);
+    if (grid[y - 1] && grid[y - 1][x]) adjacent.push(grid[y - 1][x]);
+    if (grid[y + 1] && grid[y + 1][x]) adjacent.push(grid[y + 1][x]);
+    if (grid[y]     && grid[y][x - 1]) adjacent.push(grid[y][x - 1]);
+    if (grid[y]     && grid[y][x + 1]) adjacent.push(grid[y][x + 1]);
 
     return adjacent;
 }
+// Get all adjacent walls
+const getAdjacentWalls = (node, grid) => {
+    const adjacent = getAdjacent(node, grid);
+    return adjacent.filter(n => n.v === '#');
+}
 const getAdjacentNonWalls = (node, grid) => {
-    let adjacent = [];
-    const x = node.x;
-    const y = node.y;
-
-    if (grid[y - 1] && grid[y - 1][x] && grid[y - 1][x].v !== '#') adjacent.push(grid[y - 1][x]);
-    if (grid[y + 1] && grid[y + 1][x] && grid[y + 1][x].v !== '#') adjacent.push(grid[y + 1][x]);
-    if (grid[y]     && grid[y][x - 1] && grid[y][x - 1].v !== '#') adjacent.push(grid[y][x - 1]);
-    if (grid[y]     && grid[y][x + 1] && grid[y][x + 1].v !== '#') adjacent.push(grid[y][x + 1]);
-
-    return adjacent;
+    const adjacent = getAdjacent(node, grid);
+    return adjacent.filter(n => n.v !== '#');
 }
 
 const convertMap = map => map.map((row, y) => row.map((v, x) => ({
@@ -73,12 +69,112 @@ console.log(shortest_path.length);
 
 
 const getPosHash = (node1, node2) => {
-    return `${node1.x.toString()},${node1.y.toString()}_${node2.x.toString()},${node2.y.toString()}`;
+    if (node1.v === '#' && node2.v === '#')
+        return `${node1.x.toString()},${node1.y.toString()}_${node2.x.toString()},${node2.y.toString()}`;
+    if (node1.v === '#')
+        return `${node1.x.toString()},${node1.y.toString()}`;
+    if (node2.v === '#')
+        return `${node2.x.toString()},${node2.y.toString()}`;
+    return 'UNDEFINED';
 }
 
-const cheats = {};
+
+
+// This is needed to check coords later
+const coordMap = Array(HEIGHT).fill(null, 0, HEIGHT).map(v => Array(WIDTH).fill(0, 0, WIDTH));
+shortest_path.forEach((node, index) => {
+    coordMap[node.y][node.x] = index;
+    if (node.Y === START_Y && node.x === START_X) return;
+    if (node.y === END_Y   && node.x === END_X) return;
+    MAP[node.y][node.x] = '+';
+});
+console.log( printMap(MAP) + '\n' ); // debug
+
+
+
+
+
+const cheats_tested = {};
 const cheats_savings = {};
 
+
+
+
+
+shortest_path.forEach((node, index) => {
+
+    let adj_walls = getAdjacentWalls(node, MAP_converted);
+    let picoseconds = 1;
+
+    // while(picoseconds < 2) {
+
+        for (const wall of adj_walls) {
+
+            for (const exitIndex of getAdjacent(wall, coordMap).filter(i => i > index)) {
+                const saved_picos = exitIndex - index;
+                const key = `${index}_${exitIndex}`;
+
+                if (cheats_savings[saved_picos]) {
+                    cheats_savings[saved_picos].push(key);
+                } else {
+                    cheats_savings[saved_picos] = [key];
+                }
+            }
+            
+
+        }
+
+        // picoseconds++;
+    // }
+
+
+
+
+});
+
+
+/*
+for (let x = 1; x < WIDTH - 1; x++) {
+    for (let y = 1; y < HEIGHT - 1; y++) {
+        if (MAP[y][x] !== '#') continue;
+
+        const disabled1 = MAP_converted[y][x];
+        const disabled2_list = getAdjacent(disabled1, MAP_converted).filter(w => getAdjacentNonWalls(w, MAP_converted ).length !== 0);
+        for (const disabled2 of disabled2_list) {
+            const k = getPosHash(disabled1, disabled2);
+            if (cheats_tested[k]) continue;
+            const k_rev = getPosHash(disabled2, disabled1);
+            if (cheats_tested[k_rev]) continue;
+
+            cheats_tested[k] = 1;
+
+            const MAP_TEST = structuredClone(MAP);
+            MAP_TEST[disabled1.y][disabled1.x] = '.';
+            MAP_TEST[disabled2.y][disabled2.x] = '.';
+            const MAP_TEST_converted = convertMap(MAP_TEST);
+
+            const astar = new AStar(MAP_TEST_converted);
+            let new_shortest_path = astar.search(MAP_TEST_converted[START_Y][START_X], MAP_TEST_converted[END_Y][END_X]);
+
+            if (new_shortest_path.length < shortest_path.length) {
+                const saved_picos = shortest_path.length - new_shortest_path.length;
+                if (cheats_savings[saved_picos]) {
+                    cheats_savings[saved_picos].push(k);
+                } else {
+                    cheats_savings[saved_picos] = [k];
+                }
+
+                // console.log(shortest_path.length - new_shortest_path.length);
+            }
+
+
+        }
+
+    }
+}
+*/
+
+/*
 shortest_path.forEach((node, ind) => {
     if (node.Y === START_Y && node.x === START_X) return;
     if (node.y === END_Y   && node.x === END_X) return;
@@ -87,12 +183,16 @@ shortest_path.forEach((node, ind) => {
     // console.log(adj_walls.length)
 
     for (const wall_node of adj_walls) {
-        const adj_walls_2 = getAdjacentWalls(wall_node, MAP_converted); // adj_walls_2.filter(w => getAdjacentNonWalls(w).length !== 0)
+        const adj_walls_2 = getAdjacentWalls(wall_node, MAP_converted).filter(w => getAdjacentNonWalls(w, MAP_converted ).length !== 0)
         for (const wall_node_2 of adj_walls_2) {
 
             const k = getPosHash(wall_node, wall_node_2);
-            if (cheats[k]) continue;
-            cheats[k] = 1;
+            if (cheats_tested[k]) continue;
+
+            const k_rev = getPosHash(wall_node_2, wall_node);
+            if (cheats_tested[k_rev]) continue;
+
+            cheats_tested[k] = 1;
 
             const MAP_TEST = structuredClone(MAP);
             MAP_TEST[wall_node.y][wall_node.x] = '.';
@@ -117,12 +217,7 @@ shortest_path.forEach((node, ind) => {
 
     return;    
 });
+*/
 
+// console.log(cheats);
 console.log(cheats_savings);
-
-for (const node of shortest_path) {
-    if (node.Y === START_Y && node.x === START_X) continue;
-    if (node.y === END_Y   && node.x === END_X) continue;
-    MAP[node.y][node.x] = 'o';
-}
-console.log( printMap(MAP) + '\n' ); // debug
