@@ -249,9 +249,10 @@ while(A_inc <= 281474976710654) {
 */
 
 const permutationSize = 3;
+const searchStart = 1; // 0 to 15 + 1 - permutationSize
 let countDigits = countEqual(DATA_EXPECTED, simplifiedComputeMap(A_inc));
 for (const permutation of generatePermutations(permutationSize, 8, true)) {
-    A_inc_split.splice(1, permutationSize, ...permutation);
+    A_inc_split.splice(searchStart, permutationSize, ...permutation);
     A_inc = combineNumberFrom3BitMasks(A_inc_split);
     
     const cnt = countEqual(DATA_EXPECTED, simplifiedComputeMap(A_inc));
