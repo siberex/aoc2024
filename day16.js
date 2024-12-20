@@ -1,11 +1,12 @@
 // Day 16
 
 import AStar from './_astar.js';
+import {printMap} from './_utils.js';
 
 import fs from 'node:fs/promises';
 import process from 'node:process';
 
-const INPUT = await fs.readFile('./input/16.txt', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/16_alt.txt', { encoding: 'utf8' });
 
 // 16_alt.txt wrong answer (105512). correct is 105508
 // https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm 
@@ -13,8 +14,8 @@ const INPUT = await fs.readFile('./input/16.txt', { encoding: 'utf8' });
 
 const DATA = INPUT.split('\n').map(r => r.split(''));
 
-const WIDTH = DATA.length;
-const HEIGHT = DATA[0]?.length;
+const HEIGHT = DATA.length;
+const WIDTH = DATA[0]?.length;
 
 const getFirstPos = (map, value) => {
     let x = -1;
@@ -35,9 +36,6 @@ const convertMap = map => map.map((row, y) => row.map((v, x) => ({
     v,
     direction: '',
 })));
-
-
-// console.log( MAP.map(r => r.join('')).join('\n') + '\n' ); // debug
 
 
 let mapConverted = convertMap(DATA);
@@ -62,19 +60,19 @@ const heuristic = (current, goal) => {
 
 const gScore = (currentNode, neighbor) => {
     let rotation = 0;
-    if (currentNode.x < neighbor.x && currentNode.direction !== '>') rotation = 1000;
-    if (currentNode.x > neighbor.x && currentNode.direction !== '<') rotation = 1000;
-    if (currentNode.y < neighbor.y && currentNode.direction !== 'v') rotation = 1000;
-    if (currentNode.y > neighbor.y && currentNode.direction !== '^') rotation = 1000;
+    if (currentNode.x < neighbor.x && currentNode.direction !== '<') rotation = 1000;
+    if (currentNode.x > neighbor.x && currentNode.direction !== '>') rotation = 1000;
+    if (currentNode.y < neighbor.y && currentNode.direction !== '^') rotation = 1000;
+    if (currentNode.y > neighbor.y && currentNode.direction !== 'v') rotation = 1000;
 
     return currentNode.g + rotation;
 }
 
 const onStep = (currentNode, neighbor) => {
-    if (currentNode.x < neighbor.x) neighbor.direction = '>';
-    if (currentNode.x > neighbor.x) neighbor.direction = '<';
-    if (currentNode.y < neighbor.y) neighbor.direction = 'v';
-    if (currentNode.y > neighbor.y) neighbor.direction = '^';
+    if (currentNode.x < neighbor.x) neighbor.direction = '<';
+    if (currentNode.x > neighbor.x) neighbor.direction = '>';
+    if (currentNode.y < neighbor.y) neighbor.direction = '^';
+    if (currentNode.y > neighbor.y) neighbor.direction = 'v';
 }
 
 const astar = new AStar(mapConverted, heuristic, gScore, onStep);
@@ -84,20 +82,20 @@ const shortest_path = astar.search(start, end);
 // console.log(`End: ${endX}, ${endY}`);
 
 const DATA2 = structuredClone(DATA);
-console.log(DATA.map(r => r.join('')).join('\n') + '\n'); // debug
+// console.log( printMap(DATA) + '\n'); // debug
 
 let score = 0;
 let lastDir = start.direction;
 shortest_path.forEach(node => {
     score++;
-    if (lastDir !== node.direction) {
+    if (lastDir !== node.direction && node.v !== 'E' && node.v !== 'S') {
         score += 1000;
         lastDir = node.direction;
     }
-    if (node.v !== 'E') DATA[node.x][node.y] = node.direction;
+    if (node.v !== 'E' && node.v !== 'S') DATA[node.y][node.x] = node.direction;
 });
+console.log( printMap(DATA) + '\n'); // debug
 
-console.log(DATA.map(r => r.join('')).join('\n') + '\n'); // debug
 
 // console.log(shortest_path.at(-1));
 // console.log(shortest_path.length); // steps count

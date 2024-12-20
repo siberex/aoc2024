@@ -3,7 +3,7 @@
 import fs from 'node:fs/promises';
 
 import AStar from './_astar.js';
-// import {permutator} from './_utils.js';
+import {printMap} from './_utils.js';
 
 const DEBUG = false;
 const input_filename = DEBUG ? './input/20.test' : './input/20.txt';
@@ -52,8 +52,6 @@ const convertMap = map => map.map((row, y) => row.map((v, x) => ({
     y,
     v
 })));
-
-const printMap = map => map.map(row => row.join('')).join('\n');
 
 console.log( printMap(MAP) + '\n' ); // debug
 

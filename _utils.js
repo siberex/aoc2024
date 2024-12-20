@@ -1,4 +1,6 @@
 
+export const printMap = map => map.map(row => row.join('')).join('\n');
+
 // Note: the most-significant bits came first
 // 77 → [1, 1, 5]
 // 173440400472902 → [4, 7, 3, 3, 7, 0, 7, 5, 3, 5, 3, 3, 5, 5, 0, 6]
@@ -104,7 +106,5 @@ export function generatePermutations(n, base, toInt) {
     return states;
 }
 
-
-function findAllCombinationsToFillStr(patterns, string) {
-
-}
+// See Day 19
+function findAllCombinationsToFillStr(patterns, string) {}
