@@ -26,6 +26,42 @@ console.log(DOOR_CODES);
 */
 
 
+/*
+379A:
+✓
+^   A   ^   ^   <   <   A       >   >   A   v   v   v   A
+✓
+<A  >A  <A  A   v<A A   >>^A    vA  A   ^A  v<A A   A   >^A
+
+
+<       A       >   A   <       A       A   v       <   A       A   >   >   ^       A   v   A   A   ^   A   v   <   A       A   A   >   ^   A
+v<<A    >>^A    vA  ^A  v<<A    >>^A    A   v<A     <A  >>^A    A   vA  A   <^A     >A  v<A >^A A   <A  >A  v<A <A  >>^A    A   A   vA  <^A >A
+
+
+
+*/
+
+
+
+
+/*
+029A:
+✓ <A^A>^^AvvvA
+
+<       A       ^   A   >   ^   ^   A   v   v v A
+v<<A    >>^A    <A  >A  vA  <^A A   >A  v<A A A >^A
+
+v<<A>>^A<A>AvA<^AA>Av<AAA>^A
+v<A<AA>>^AvAA<^A>Av<<A>>^AvA^Av<A>^Av<<A>^A>AAvA^Av<A<A>>^AAAvA<^A>A
+
+
+<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
+v<<A>>^A<A>AvA<^AA>A<vAAA>^A
+✓ <A^A>^^AvvvA
+029A
+*/
+
+
 const NUMPAD = [
     ['7',   '8',    '9'],
     ['4',   '5',    '6'],
@@ -108,19 +144,19 @@ function sequenceArrowpad(code) {
         if (dx === 0 && dy === 0) {
             // console.log('YARR');
             // NOOP
-        } else if (dx === 0) {
-            if (dy > 0) commands += 'v'.repeat(dy);
-            if (dy < 0) commands += '^'.repeat(-dy);
         } else if (dy === 0) {
             if (dx > 0) commands += '>'.repeat(dx);
             if (dx < 0) commands += '<'.repeat(-dx);
+        } else if (dx === 0) {
+            if (dy > 0) commands += 'v'.repeat(dy);
+            if (dy < 0) commands += '^'.repeat(-dy);
         } else {
             if (dx > 0 && dy > 0) {
                 commands += '>'.repeat(dx);
                 commands += '^'.repeat(dy);
             } else if (dx < 0 && dy < 0) {
-                commands += '^'.repeat(-dy);
                 commands += '<'.repeat(-dx);
+                commands += '^'.repeat(-dy);
             } else if (dx < 0 && dy > 0) {
                 commands += 'v'.repeat(dy);     // important to first move vertically
                 commands += '<'.repeat(-dx);
