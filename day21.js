@@ -37,6 +37,9 @@ console.log(DOOR_CODES);
 <       A       >   A   <       A       A   v       <   A       A   >   >   ^       A   v   A   A   ^   A   v   <   A       A   A   >   ^   A
 v<<A    >>^A    vA  ^A  v<<A    >>^A    A   v<A     <A  >>^A    A   vA  A   <^A     >A  v<A >^A A   <A  >A  v<A <A  >>^A    A   A   vA  <^A >A
 
+replace v<A with <vA:
+<       A       >   A   <       A       A   <       v   A   A   >   >   ^   A   v   A   A   ^   A   <       v   A   A   A   >   ^   A
+v<<A    >>^A    vA  ^A  v<<A    >>^A    A   v<<A    >A  >^A A   vA  A   <^A >A  v<A >^A A   <A  >A  v<<A    >A  >^A A   A   vA  <^A >A
 
 
 */
@@ -72,7 +75,7 @@ const NUMPAD = [
 const MAP_NUMPAD = new Map();
 const NUMPAD_MAP = new Map();
 NUMPAD.map((row, y) => row.map((key, x) => {
-    MAP_NUMPAD.set([x, y], key);
+    MAP_NUMPAD.set(`${x}.${y}`, key);
     NUMPAD_MAP.set(key, [x, y]);
 }));
 
@@ -87,9 +90,45 @@ const ARROWPAD = [
 const MAP_ARROWPAD = new Map();
 const ARROWPAD_MAP = new Map();
 ARROWPAD.map((row, y) => row.map((key, x) => {
-    MAP_ARROWPAD.set([x, y], key);
+    MAP_ARROWPAD.set(`${x}.${y}`, key);
     ARROWPAD_MAP.set(key, [x, y]);
 }));
+
+
+function getArrowButtons(sequence) {
+    let pos = ARROWPAD_MAP.get('A');
+    let result = '';
+    sequence.split('').forEach(move => {
+        let [x, y] = pos;
+        if (move === '^') y -= 1;
+        if (move === 'v') y += 1;
+        if (move === '<') x -= 1;
+        if (move === '>') x += 1;
+        if (move === 'A')
+            result += MAP_ARROWPAD.get(`${x}.${y}`);
+        pos = [x, y];
+    });
+
+    return result;
+}
+
+function getNumpadButtons(sequence) {
+    let pos = NUMPAD_MAP.get('A');
+    let result = '';
+    sequence.split('').forEach(move => {
+        let [x, y] = pos;
+        if (move === '^') y -= 1;
+        if (move === 'v') y += 1;
+        if (move === '<') x -= 1;
+        if (move === '>') x += 1;
+        if (move === 'A')
+            result += MAP_NUMPAD.get(`${x}.${y}`);
+        pos = [x, y];
+    });
+
+    return result; 
+}
+
 
 
 function sequenceNumpad(code) {
@@ -100,7 +139,7 @@ function sequenceNumpad(code) {
         const [x, y] = NUMPAD_MAP.get(targetKey);    
         const dx = x - x0, 
               dy = y - y0;
-    
+
         if (dx === 0 && dy === 0) {
             // NOOP
         } else if (dx === 0) {
@@ -124,7 +163,7 @@ function sequenceNumpad(code) {
                 commands += '^'.repeat(-dy);
             }
         }
-    
+
         commands += 'A';
         pos = [x, y];
         // console.log(commands); // debug
@@ -140,7 +179,7 @@ function sequenceArrowpad(code) {
         const [x, y] = ARROWPAD_MAP.get(targetKey);    
         const dx = x - x0, 
               dy = y - y0;
-    
+
         if (dx === 0 && dy === 0) {
             // console.log('YARR');
             // NOOP
@@ -165,7 +204,7 @@ function sequenceArrowpad(code) {
                 commands += '^'.repeat(-dy);
             }
         }
-    
+
         commands += 'A';
         pos = [x, y];
         // console.log(commands); // debug
@@ -212,3 +251,12 @@ console.log( seqMy.length, codeNumeric, complexity );
 // console.log( complexity );
 
 
+
+const arrows1 = getArrowButtons('<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A');
+console.log( arrows1 );
+
+const arrows2 = getArrowButtons(arrows1);
+console.log( arrows2 );
+
+const numpad = getNumpadButtons(arrows2);
+console.log( numpad );
