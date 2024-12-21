@@ -65,7 +65,9 @@ function sequenceNumpad(code) {
         const dx = x - x0, 
               dy = y - y0;
     
-        if (dx === 0) {
+        if (dx === 0 && dy === 0) {
+            // NOOP
+        } else if (dx === 0) {
             if (dy > 0) commands += 'v'.repeat(dy);
             if (dy < 0) commands += '^'.repeat(-dy);
         } else if (dy === 0) {
@@ -103,7 +105,10 @@ function sequenceArrowpad(code) {
         const dx = x - x0, 
               dy = y - y0;
     
-        if (dx === 0) {
+        if (dx === 0 && dy === 0) {
+            // console.log('YARR');
+            // NOOP
+        } else if (dx === 0) {
             if (dy > 0) commands += 'v'.repeat(dy);
             if (dy < 0) commands += '^'.repeat(-dy);
         } else if (dy === 0) {
@@ -149,6 +154,10 @@ DOOR_CODES.forEach(code => {
 
 // '379A' last sequence length is wrong!
 // expected 64, NOT 68
+
+// 379A: <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
+//   MY: v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA^<A>Av<A>^AA<A>Av<A<A>>^AAAvA^<A>A
+
 const code = '379A';
 
 const codeNumeric = Number( code.replace('A', '') );
