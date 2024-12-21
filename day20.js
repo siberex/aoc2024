@@ -2,7 +2,7 @@
 
 import fs from 'node:fs/promises';
 
-import AStar from './_astar.js';
+import {AStar, manhattan} from './_astar.js';
 import {printMap} from './_utils.js';
 
 const DEBUG = false;
@@ -53,10 +53,9 @@ const convertMap = map => map.map((row, y) => row.map((v, x) => ({
     v
 })));
 
-console.log( printMap(MAP) + '\n' ); // debug
+// console.log( printMap(MAP) + '\n' ); // debug
 
 const MAP_converted = convertMap(MAP);
-
 
 const [START_X, START_Y] = getFirstPos(MAP, 'S');
 const [END_X, END_Y] = getFirstPos(MAP, 'E');
@@ -65,6 +64,7 @@ const [END_X, END_Y] = getFirstPos(MAP, 'E');
 const astar = new AStar(MAP_converted);
 const shortest_path = astar.search(MAP_converted[START_Y][START_X], MAP_converted[END_Y][END_X]);
 
+console.log(astar.printGrid());
 // console.log(shortest_path.length);
 
 
@@ -137,14 +137,6 @@ console.log(total);
 const min_saving = DEBUG ? 50 : 100;
 const megacheats_tested = {};
 const megacheats_savings = {};
-
-const manhattan = (current, goal) => {
-    let d1 = goal.x - current.x;
-    if (d1 < 0) d1 = -d1; // eq. Math.abs();
-    let d2 = goal.y - current.y;
-    if (d2 < 0) d2 = -d2;
-    return d1 + d2;
-}
 
 // Iterate over shortest path from 0 to end, and from i to end.
 // Check how many picoseconds can be saved by circumventing the path.

@@ -1,6 +1,16 @@
 import BinaryHeap from './_binaryheap.js';
 
-class AStar {
+// Manhattan distance
+// Check out list of heuristics here: http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
+export const manhattan = (current, goal) => {
+    let d1 = goal.x - current.x;
+    if (d1 < 0) d1 = -d1; // eq. Math.abs();
+    let d2 = goal.y - current.y;
+    if (d2 < 0) d2 = -d2;
+    return d1 + d2;
+}
+
+export class AStar {
     /**
      * 
      * @param {Array[Array[{x: Number, y: Number}]]} grid 
@@ -10,7 +20,7 @@ class AStar {
      * @param {Callable?} isWall called to check if grid node is an impassable wall. By default checks if node.v === '#'
      */
     constructor(grid, heuristic, gScore, onStep, isWall) {
-        this.heuristic = heuristic === undefined ? this.manhattan : heuristic;
+        this.heuristic = heuristic === undefined ? manhattan : heuristic;
         this.gScore = gScore === undefined ? (current, adjacent) => current.g + 1 : gScore;
         this.onStep = onStep === undefined ? (current, adjacent) => {} : onStep;
         this.isWall = isWall === undefined ? (node => node.v === '#') : isWall;
@@ -35,16 +45,6 @@ class AStar {
     printNode(node) {
         return node.v;
     }
-
-    heuristic(current, goal) {
-        // See list of heuristics: http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
-
-        let d1 = goal.x - current.x;
-        if (d1 < 0) d1 = -d1; // eq. Math.abs();
-        let d2 = goal.y - current.y;
-        if (d2 < 0) d2 = -d2;
-        return d1 + d2;
-    } // manhattan
 
     // Get all adjacent nodes
     neighbors(node) {
