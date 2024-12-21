@@ -5,12 +5,13 @@ import fs from 'node:fs/promises';
 import {manhattan} from './_astar.js';
 import {printMap} from './_utils.js';
 
-const DEBUG = false;
+const DEBUG = true;
 const input_filename = DEBUG ? './input/21.test' : './input/21.txt';
 const INPUT = await fs.readFile(input_filename, { encoding: 'utf8' });
 
-const DOOR_CODES = INPUT.split('\n').map(row => row.split(''));
+const DOOR_CODES = INPUT.split('\n').filter(v => v);
 
+console.log(DOOR_CODES);
 
 /*
 +---+---+---+
@@ -24,10 +25,6 @@ const DOOR_CODES = INPUT.split('\n').map(row => row.split(''));
     +---+---+                   +---+---+---+                   +---+---+---+                   +---+---+---+
 */
 
-
-
-let code = '029A'.split('');
-let codeNumeic = Number( code.join('').replace('A', '') );
 
 const NUMPAD = [
     ['7',   '8',    '9'],
@@ -43,8 +40,8 @@ NUMPAD.map((row, y) => row.map((key, x) => {
     NUMPAD_MAP.set(key, [x, y]);
 }));
 
-console.log('MAP_NUMPAD', MAP_NUMPAD); // debug
-console.log('NUMPAD_MAP', NUMPAD_MAP); // debug
+// console.log('MAP_NUMPAD', MAP_NUMPAD); // debug
+// console.log('NUMPAD_MAP', NUMPAD_MAP); // debug
 
 const ARROWPAD = [
     [null,  '^',    'A'],
@@ -59,48 +56,114 @@ ARROWPAD.map((row, y) => row.map((key, x) => {
 }));
 
 
-let pos = NUMPAD_MAP.get('A');
-
-code.forEach(targetKey => {
-    const [x0, y0] = pos;
-    const [x, y] = NUMPAD_MAP.get(targetKey);
-    
-    const dx = x - x0;
-    const dy = y - y0;
-
+function sequenceNumpad(code) {
+    let pos = NUMPAD_MAP.get('A');
     let commands = '';
-
-    if (dx === 0) {
-        if (dy > 0) commands += 'v'.repeat(dy);
-        if (dy < 0) commands += '^'.repeat(-dy);
-    } else if (dy === 0) {
-        if (dx > 0) commands += '>'.repeat(dx);
-        if (dx < 0) commands += '<'.repeat(-dx);
-    } else {
-        if (dx > 0 && dy > 0) {
-            commands += '>'.repeat(dx); // important to first move horizontally
-            commands += '^'.repeat(dy);
-        } else if (dx < 0 && dy < 0) {
-            commands += '^'.repeat(-dy); // important to first move vertically
-            commands += '<'.repeat(-dx);
-        } else if (dx < 0 && dy > 0) {
-            commands += '<'.repeat(-dx);
-            commands += 'v'.repeat(dy);
-        } else if (dx > 0 && dy < 0) {
-            commands += '>'.repeat(dx);
-            commands += '^'.repeat(-dy);
+    code.split('').forEach(targetKey => {
+        const [x0, y0] = pos;
+        const [x, y] = NUMPAD_MAP.get(targetKey);    
+        const dx = x - x0, 
+              dy = y - y0;
+    
+        if (dx === 0) {
+            if (dy > 0) commands += 'v'.repeat(dy);
+            if (dy < 0) commands += '^'.repeat(-dy);
+        } else if (dy === 0) {
+            if (dx > 0) commands += '>'.repeat(dx);
+            if (dx < 0) commands += '<'.repeat(-dx);
+        } else {
+            if (dx > 0 && dy > 0) {
+                commands += '>'.repeat(dx);     // important to first move horizontally
+                commands += '^'.repeat(dy);
+            } else if (dx < 0 && dy < 0) {
+                commands += '^'.repeat(-dy);    // important to first move vertically
+                commands += '<'.repeat(-dx);
+            } else if (dx < 0 && dy > 0) {
+                commands += '<'.repeat(-dx);
+                commands += 'v'.repeat(dy);
+            } else if (dx > 0 && dy < 0) {
+                commands += '>'.repeat(dx);
+                commands += '^'.repeat(-dy);
+            }
         }
-    }
+    
+        commands += 'A';
+        pos = [x, y];
+        // console.log(commands); // debug
+    });
+    return commands;
+}
 
-    commands += 'A';
-    pos = [x, y];
-    console.log(commands);
+function sequenceArrowpad(code) {
+    let pos = ARROWPAD_MAP.get('A');
+    let commands = '';
+    code.split('').forEach(targetKey => {
+        const [x0, y0] = pos;
+        const [x, y] = ARROWPAD_MAP.get(targetKey);    
+        const dx = x - x0, 
+              dy = y - y0;
+    
+        if (dx === 0) {
+            if (dy > 0) commands += 'v'.repeat(dy);
+            if (dy < 0) commands += '^'.repeat(-dy);
+        } else if (dy === 0) {
+            if (dx > 0) commands += '>'.repeat(dx);
+            if (dx < 0) commands += '<'.repeat(-dx);
+        } else {
+            if (dx > 0 && dy > 0) {
+                commands += '>'.repeat(dx);
+                commands += '^'.repeat(dy);
+            } else if (dx < 0 && dy < 0) {
+                commands += '^'.repeat(-dy);
+                commands += '<'.repeat(-dx);
+            } else if (dx < 0 && dy > 0) {
+                commands += 'v'.repeat(dy);     // important to first move vertically
+                commands += '<'.repeat(-dx);
+            } else if (dx > 0 && dy < 0) {
+                commands += '>'.repeat(dx);     // important to first move horizontally
+                commands += '^'.repeat(-dy);
+            }
+        }
+    
+        commands += 'A';
+        pos = [x, y];
+        // console.log(commands); // debug
+    });
+    return commands;
+}
 
+
+
+let total = 0;
+DOOR_CODES.forEach(code => {
+    const codeNumeric = Number( code.replace('A', '') );
+
+    const seqMy = '';
+
+    const complexity = seqMy.length * codeNumeric;
+    total += complexity;
 });
+// console.log(total);
+// 288800 — answer is too high
 
 
+// '379A' last sequence length is wrong!
+// expected 64, NOT 68
+const code = '379A';
 
+const codeNumeric = Number( code.replace('A', '') );
 
+const seqN = sequenceNumpad(code);
+console.log( seqN );
 
-let posA = ARROWPAD_MAP.get('A');
+const seqA = sequenceArrowpad(seqN);
+console.log( seqA );
+
+const seqMy = sequenceArrowpad(seqA);
+console.log( seqMy, seqMy.length );
+
+const complexity = seqMy.length * codeNumeric;
+console.log( seqMy.length, codeNumeric, complexity );
+// console.log( complexity );
+
 
