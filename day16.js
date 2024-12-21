@@ -6,7 +6,7 @@ import {printMap} from './_utils.js';
 import fs from 'node:fs/promises';
 import process from 'node:process';
 
-const INPUT = await fs.readFile('./input/16_alt.txt', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/16.txt', { encoding: 'utf8' });
 
 // 16_alt.txt wrong answer (105512). correct is 105508
 // https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm 
@@ -102,11 +102,20 @@ console.log( printMap(DATA) + '\n'); // debug
 console.log(shortest_path.at(-1).g + shortest_path.length);
 console.log(`Part_1: ${score}`);
 
-// WTF. Now it is 136536 instead of 135536 !
+
+
 
 process.exit();
 
 // Part 2
+
+// TODO:
+// Simlpe breadth-first search between pairs of nodes on the shortest path?
+// Johnson’s algorithm?
+// Floyd-Warshall Algorithm?
+// Dijkstra? Bellman-Ford? Topo sort?
+
+
 let grid = convertMap(DATA2);
 
 let test_score = 0;
@@ -120,7 +129,7 @@ shortest_path.forEach(pathNode => {
     DATA2[pathNode.x][pathNode.y] = 'O'; 
 
     const test_grid = structuredClone(grid);
-    const test_nodes = astar.neighbors(test_grid, pathNode).filter(n => n.v === '.');
+    const test_nodes = astar.neighbors(pathNode).filter(n => n.v === '.');
 
     test_nodes.forEach(test_node => {
         let tmp_score = test_score;

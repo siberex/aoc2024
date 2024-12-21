@@ -99,7 +99,7 @@ export class AStar {
                 // gScore is the shortest distance from the current node to the adjacent one.
                 // Accumulated g score is the shortest distance from the start to the current node.
                 // We need to check if the path we have arrived at this neighbor is the shortest one we've seen so far.
-                // Trivial case increments g score by one, weighted grapsh could use customized arithmetic.
+                // Trivial case increments g score by one, weighted graph could use some customized arithmetic.
                 const gScore = this.gScore(currentNode, neighbor);
                 const beenVisited = neighbor.visited;
 
@@ -111,6 +111,7 @@ export class AStar {
                     neighbor.g = gScore;
                     neighbor.f = neighbor.g + neighbor.h;
 
+                    // Any additional actions we want to do, like setting additional node properties, etc.
                     this.onStep(currentNode, neighbor);
                     
                     if (!beenVisited) {
