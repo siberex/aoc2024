@@ -104,6 +104,7 @@ function getArrowButtons(sequence) {
         if (move === 'v') y += 1;
         if (move === '<') x -= 1;
         if (move === '>') x += 1;
+        if (MAP_ARROWPAD.get(`${x}.${y}`) === null) throw new Error('SEGFAULT!!!');
         if (move === 'A')
             result += MAP_ARROWPAD.get(`${x}.${y}`);
         pos = [x, y];
@@ -121,6 +122,7 @@ function getNumpadButtons(sequence) {
         if (move === 'v') y += 1;
         if (move === '<') x -= 1;
         if (move === '>') x += 1;
+        if (MAP_NUMPAD.get(`${x}.${y}`) === null) throw new Error('SEGFAULT!!!');
         if (move === 'A')
             result += MAP_NUMPAD.get(`${x}.${y}`);
         pos = [x, y];
