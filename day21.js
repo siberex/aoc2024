@@ -183,13 +183,13 @@ function sequenceNumpad(code) {
                 }
             } else if (dx < 0 && dy < 0) {
                 // fixme: add TRICKY branch
-                if (x === nullX || y === nullY) {
-                    commands += '^'.repeat(-dy);    // important to first move vertically
-                    commands += '<'.repeat(-dx);
-                } else {
+                // if (x === nullX || y === nullY) {
+                //     commands += '^'.repeat(-dy);    // important to first move vertically
+                //     commands += '<'.repeat(-dx);
+                // } else {
                     commands += '<'.repeat(-dx);
                     commands += '^'.repeat(-dy);
-                }
+                // }
             } else if (dx < 0 && dy > 0) {
                 // fixme: add branch
                 commands += '<'.repeat(-dx);
@@ -266,12 +266,31 @@ let total = 0;
 DOOR_CODES.forEach(code => {
     const codeNumeric = Number( code.replace('A', '') );
 
-    const seqMy = '';
-
+    const seqN = sequenceNumpad(code);
+    // console.log( seqN );
+    
+    const seqA = sequenceArrowpad(seqN);
+    // console.log( seqA );
+    
+    const seqMy = sequenceArrowpad(seqA);
+    // console.log( seqMy, seqMy.length );
+    
     const complexity = seqMy.length * codeNumeric;
+    console.log( `${code}: ${seqMy.length} × ${codeNumeric} = ${complexity}\n` );
+
+    const arrows1 = getArrowButtons(seqMy);
+    // console.log('Verify:');
+    // console.log( arrows1 );
+    
+    const arrows2 = getArrowButtons(arrows1);
+    // console.log( arrows2 );
+    
+    const numpad = getNumpadButtons(arrows2);
+    // console.log( numpad );
+    
     total += complexity;
 });
-// console.log(total);
+console.log(total);
 // 288800 — answer is too high
 
 
@@ -281,7 +300,26 @@ DOOR_CODES.forEach(code => {
 // 379A: <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
 //   MY: v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA^<A>Av<A>^AA<A>Av<A<A>>^AAAvA^<A>A
 
-const code = '029A';
+/*
+
+My:
+379A:
+^A^^<<A>>AvvvA
+<A>A <AAv<AA>>^A vAA^A<vAAA>^A
+v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^AA<A>Av<<A>A>^AAAvA<^A>A 68
+
+Expected:
+<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
+<A>A v<<AA>^AA>A vAA^A<vAAA>^A
+^A<<^^A>>AvvvA
+379A
+
+
+*/
+
+process.exit();
+
+const code = '379A';
 
 const codeNumeric = Number( code.replace('A', '') );
 
@@ -307,3 +345,4 @@ console.log( arrows2 );
 
 const numpad = getNumpadButtons(arrows2);
 console.log( numpad );
+
