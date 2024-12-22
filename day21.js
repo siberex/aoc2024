@@ -217,24 +217,23 @@ function sequenceNumpadVariations(code) {
             if (dx < 0) commands.add('<'.repeat(-dx));
         } else {
             if (dx > 0 && dy > 0) {
-                if (x === nullX || y === nullY) {
+                if (x === nullX) {
                     // important to first move horizontally
-                    commands.add('>'.repeat(dx) + '^'.repeat(dy));
+                    commands.add('>'.repeat(dx) + 'v'.repeat(dy));
                 } else {
                     commands.add([
-                        '>'.repeat(dx) + '^'.repeat(dy),
-                        '^'.repeat(dy) + '>'.repeat(dx),
+                        '>'.repeat(dx) + 'v'.repeat(dy),
+                        'v'.repeat(dy) + '>'.repeat(dx),
                     ]);
                 }
             } else if (dx < 0 && dy < 0) {
-                // fixme: add TRICKY branch
-                if (x === nullX || y === nullY) {
+                if (y === nullY) {
                     // important to first move vertically
                     commands.add('^'.repeat(-dy) + '<'.repeat(-dx));
                 } else {
                     commands.add([
                         '^'.repeat(-dy) + '<'.repeat(-dx),
-                        '<'.repeat(-dx) + '^'.repeat(-dy), // ???
+                        '<'.repeat(-dx) + '^'.repeat(-dy),
                     ]);
                 }
             } else if (dx < 0 && dy > 0) {
@@ -288,7 +287,7 @@ function sequenceArrowpadVariations(code) {
                     '^'.repeat(-dy) + '<'.repeat(-dx),
                 ]);
             } else if (dx < 0 && dy > 0) {
-                if (x === nullX || y === nullY) {
+                if (x === nullX) {
                     // important to first move vertically
                     commands.add('v'.repeat(dy) + '<'.repeat(-dx));
                 } else {
@@ -298,7 +297,7 @@ function sequenceArrowpadVariations(code) {
                     ]);
                 }
             } else if (dx > 0 && dy < 0) {
-                if (x === nullX || y === nullY) {
+                if (x === nullX) {
                     // important to first move horizontally
                     commands.add('>'.repeat(dx) + '^'.repeat(-dy));
                 } else {
@@ -384,7 +383,7 @@ const codeNumeric = Number( code.replace('A', '') );
 const seqN = sequenceNumpadVariations(code);
 console.log( seqN );
 
-const seqA = sequenceArrowpadVariations(seqN[0]);
+const seqA = sequenceArrowpadVariations(seqN[1]);
 console.log( seqA );
 
 const seqMy = sequenceArrowpadVariations(seqA[0]);
