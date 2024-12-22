@@ -113,12 +113,15 @@ const ALL_PRICE_CHANGE_TUPLES = SEED_NUMBERS.map(n => {
 
 const ALL_SELLER_PRICE_SEQUENCES = ALL_PRICE_CHANGE_TUPLES.map(sellerPricesWithChange => {
     const prices = new Map();
-    for (let i = 4; i < sellerPricesWithChange.length; i++) {
+    // Note: slice end argument is non-inclusive!
+    for (let i = 4; i < sellerPricesWithChange.length + 1; i++) {
         const slidingWindow = sellerPricesWithChange.slice(i - 4, i);
         const changeSeq = slidingWindow.map(PrCh => PrCh[1]);
         // const price = slidingWindow[3][0];
-        // Note: 0-price should NOT be excluded, cause monkey checks only for the first sequence match, not for non-zero price
-        if (!prices.has(changeSeq.toString())) prices.set(changeSeq.toString(), slidingWindow[3][0]);
+        // Note: 0-price should NOT be excluded probably,
+        // because monkey checks only for the first sequence match, not for non-zero price.
+        // Still, it does not change the answer
+        if (!prices.has(changeSeq.toString()) && slidingWindow[3][0] > 0) prices.set(changeSeq.toString(), slidingWindow[3][0]);
     }
     // console.log(sequences.has('-2,1,-1,3'));
     return prices;
@@ -192,41 +195,26 @@ console.log(listHighestPrices);
 const MEMO = new Map();
 
 function totalBananasForSequence(sequence) {
-    const sequenceStr = sequence.toString();
 
-    if (MEMO.has(sequenceStr)) return MEMO.get(sequenceStr);
+    if (MEMO.has(sequence)) return MEMO.get(sequence);
 
     const total = ALL_SELLER_PRICE_SEQUENCES.map(
-        sequencePriceMap => sequencePriceMap.get(sequenceStr)
+        sequencePriceMap => sequencePriceMap.get(sequence)
     ).filter(v => v !== undefined).reduce( (acc, v) => acc + v, 0 );
 
-
-    /*
-    const total = ALL_PRICE_CHANGE_TUPLES.map(tuples => {
-        for (let i = 4; i < tuples.length; i++) {
-            const slidingWindow = tuples.slice(i - 4, i);
-            const changeSeq = slidingWindow.map(PrCh => PrCh[1]);
-            if (changeSeq.toString() === sequenceStr) {
-                return slidingWindow[3][0]; // price at the end of the sequence
-            }
-        }
-        return 0;
-    }).reduce( (acc, v) => acc + v, 0 );
-    */
-
-    MEMO.set(sequenceStr, total);
+    MEMO.set(sequence, total);
 
     return total;
 }
 
-// console.log( totalBananasForSequence([-2, 1, -1, 3]) );
+console.log( totalBananasForSequence('-2,1,-1,3') );
 
 
 
 // process.exit();
 
-let totals = ALL_SELLER_PRICE_SEQUENCES.map((sequencePriceMap, i) => {
-    console.log(i);
+let maxBananasPerSeller = ALL_SELLER_PRICE_SEQUENCES.map((sequencePriceMap, i) => {
+    // console.log(i);
     let maxBananas = 0;
     let maxSequence = '';
 
@@ -237,59 +225,15 @@ let totals = ALL_SELLER_PRICE_SEQUENCES.map((sequencePriceMap, i) => {
             maxSequence = sequence;
         }
     });
-
-    // Sliding window
-    /*
-    for (let i = 4; i < tuples.length; i++) {
-        const sequence = tuples.slice(i - 4, i).map(PriceChange => PriceChange[1]);
-        const seqTotal = totalBananasForSequence(sequence);
-        if (seqTotal > maxBananas) maxBananas = seqTotal;
-    }
-    */
-
+    
     // console.log(maxBananas, 'max');
-    return {price: maxBananas, sequence: maxSequence};
+    return {bananas: maxBananas, sequence: maxSequence};
 });
 
-console.log('Max', totals.reduce((acc, v) => acc > v.price ? acc : v.price, 0) );
+console.log(
+    maxBananasPerSeller.reduce((acc, v) => acc.bananas > v.bananas ? acc : v, maxBananasPerSeller[0]) 
+);
 
-totals.forEach(t => console.log(`${t.price}, ${t.sequence}`));
+// totals.forEach(t => console.log(`${t.price}, ${t.sequence}`));
 
 // 1712 — answer is too low
-
-
-
-
-/*
-// ?BUGGY? code:
-let bestPriceSequences = SEED_NUMBERS.map(n => {
-    let highestPrice = 0;
-    let bestSequence = [];
-
-    const LIFO = [];
-    for (let i = 0; i < 2000; i++) {
-        const current = next(n);
-        const price = current % 10;
-
-        const change = price - (n % 10);
-        LIFO.push(change);
-        if (LIFO.length > 4) LIFO.shift();
-
-        if (highestPrice < price && LIFO.length === 4) {
-            // console.log('High', price, LIFO);
-            bestSequence = structuredClone(LIFO);
-            highestPrice = price;
-        }
-
-        n = current;
-    }
-
-    console.log(highestPrice, bestSequence);
-    return {
-        price: highestPrice,
-        seq: bestSequence,
-    };
-});
-*/
-
-
