@@ -2,9 +2,6 @@
 
 import fs from 'node:fs/promises';
 
-import {manhattan} from './_astar.js';
-import {printMap} from './_utils.js';
-
 const DEBUG = false;
 const input_filename = DEBUG ? './input/22.test2' : './input/22.txt';
 const INPUT = await fs.readFile(input_filename, { encoding: 'utf8' });
@@ -15,6 +12,7 @@ const SEED_NUMBERS = INPUT.split('\n').filter(v => v).map(Number);
 
 
 function next(n) {
+    // JS integers of 53-bit length are not ebough for this task, have to use BigInts
     n = BigInt(n);
 
     // multiply by 64, mix, prune
@@ -47,7 +45,7 @@ let res = SEED_NUMBERS.map(n => {
     return n;
 });
 // Part 1 result:
-// console.log( res.reduce((acc, v) => acc + v, 0) );
+console.log( res.reduce((acc, v) => acc + v, 0) );
 
 
 
@@ -98,19 +96,6 @@ const ALL_PRICE_CHANGE_TUPLES = SEED_NUMBERS.map(n => {
 });
 
 
-
-// const ALL_SELLER_SEQUENCES = ALL_PRICE_CHANGE_TUPLES.map(sellerPricesWithChange => {
-//     const listSequences = [];
-//     for (let i = 4; i < sellerPricesWithChange.length; i++) {
-//         const slidingWindow = sellerPricesWithChange.slice(i - 4, i);
-//         const changeSeq = slidingWindow.map(PrCh => PrCh[1]);
-//         listSequences.push(changeSeq.toString());
-//     }
-//     return listSequences;
-// });
-// console.log(ALL_SELLER_SEQUENCES[0]);
-
-
 const ALL_SELLER_PRICE_SEQUENCES = ALL_PRICE_CHANGE_TUPLES.map(sellerPricesWithChange => {
     const prices = new Map();
     // Note: slice end argument is non-inclusive!
@@ -126,68 +111,27 @@ const ALL_SELLER_PRICE_SEQUENCES = ALL_PRICE_CHANGE_TUPLES.map(sellerPricesWithC
     // console.log(sequences.has('-2,1,-1,3'));
     return prices;
 });
-
-
 // console.log(ALL_SELLER_PRICE_SEQUENCES[0]);
 // ALL_SELLER_PRICE_SEQUENCES.forEach(seq => console.log(seq.size));
 
 
+// Just to checking absolute maximum is not the right answer:
+// const listHighestPrices = ALL_PRICE_CHANGE_TUPLES.map(sellerPricesWithChange => {
+//     let sellerHighestPrice = 0;
+//     let highestPriceSequence = [];
+//     for (let i = 4; i < sellerPricesWithChange.length + 1; i++) {
+//         const slidingWindow = sellerPricesWithChange.slice(i - 4, i);
+//         const changeSeq = slidingWindow.map(PrCh => PrCh[1]);
 
+//         if (slidingWindow[3][0] > sellerHighestPrice) {
+//             sellerHighestPrice = slidingWindow[3][0];
+//             highestPriceSequence = changeSeq;
+//         }        
+//     }
 
-
-/*
-const ALL_SELLER_UNIQ_SEQUENCES = ALL_PRICE_CHANGE_TUPLES.map(sellerPricesWithChange => {
-    const sequences = new Set();
-    for (let i = 4; i < sellerPricesWithChange.length; i++) {
-        const slidingWindow = sellerPricesWithChange.slice(i - 4, i);
-        const changeSeq = slidingWindow.map(PrCh => PrCh[1]);
-        sequences.add(changeSeq.toString());
-    }
-    // console.log(sequences.has('-2,1,-1,3'));
-    return sequences;
-});
-// console.log(ALL_SELLER_UNIQ_SEQUENCES[0]);
-
-
-let SequencesIntersetion = ALL_SELLER_UNIQ_SEQUENCES[0];
-// console.log(SequencesIntersetion.intersection( new Set(['-2,1,-1,3']) ));
-
-// console.log(  SequencesIntersetion.intersection(ALL_SELLER_UNIQ_SEQUENCES[1])  ); // ✓
-for (let i = 1; i < ALL_SELLER_UNIQ_SEQUENCES.length - 1; i++) {
-    const intersection = SequencesIntersetion.intersection(ALL_SELLER_UNIQ_SEQUENCES[i]);
-    console.log(`${i}:\t${intersection.size}`);
-
-    // SequencesIntersetion = SequencesIntersetion.intersection(ALL_SELLER_UNIQ_SEQUENCES[i]);
-}
-
-// console.log(SequencesIntersetion);
-*/
-
-
-
-
-
-
-// Just checking absolute maximum is not the right answer
-// We need to find some kind of weighted-average local maximum instead
-/*
-const listHighestPrices = ALL_PRICE_CHANGE_TUPLES.map(sellerPricesWithChange => {
-    let sellerHighestPrice = 0;
-    let highestPriceSequence = [];
-    for (let i = 4; i < sellerPricesWithChange.length; i++) {
-        const slidingWindow = sellerPricesWithChange.slice(i - 4, i);
-        const changeSeq = slidingWindow.map(PrCh => PrCh[1]);
-
-        if (slidingWindow[3][0] > sellerHighestPrice) {
-            sellerHighestPrice = slidingWindow[3][0];
-            highestPriceSequence = changeSeq;
-        }        
-    }
-
-    return {price: sellerHighestPrice, seq: highestPriceSequence};
-});
-console.log(listHighestPrices);
-*/
+//     return {price: sellerHighestPrice, seq: highestPriceSequence};
+// });
+// console.log(listHighestPrices);
 
 // console.log(ALL_PRICE_CHANGE_TUPLES);
 
@@ -195,7 +139,6 @@ console.log(listHighestPrices);
 const MEMO = new Map();
 
 function totalBananasForSequence(sequence) {
-
     if (MEMO.has(sequence)) return MEMO.get(sequence);
 
     const total = ALL_SELLER_PRICE_SEQUENCES.map(
@@ -203,18 +146,13 @@ function totalBananasForSequence(sequence) {
     ).filter(v => v !== undefined).reduce( (acc, v) => acc + v, 0 );
 
     MEMO.set(sequence, total);
-
     return total;
 }
+// console.log( totalBananasForSequence('-2,1,-1,3') ); // debug
 
-console.log( totalBananasForSequence('-2,1,-1,3') );
-
-
-
-// process.exit();
 
 let maxBananasPerSeller = ALL_SELLER_PRICE_SEQUENCES.map((sequencePriceMap, i) => {
-    // console.log(i);
+    // console.log(i); // progress
     let maxBananas = 0;
     let maxSequence = '';
 
@@ -226,14 +164,9 @@ let maxBananasPerSeller = ALL_SELLER_PRICE_SEQUENCES.map((sequencePriceMap, i) =
         }
     });
     
-    // console.log(maxBananas, 'max');
     return {bananas: maxBananas, sequence: maxSequence};
 });
 
 console.log(
     maxBananasPerSeller.reduce((acc, v) => acc.bananas > v.bananas ? acc : v, maxBananasPerSeller[0]) 
 );
-
-// totals.forEach(t => console.log(`${t.price}, ${t.sequence}`));
-
-// 1712 — answer is too low
