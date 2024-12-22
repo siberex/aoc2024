@@ -97,13 +97,83 @@ const ALL_PRICE_CHANGE_TUPLES = SEED_NUMBERS.map(n => {
     return res;
 });
 
+
+
+// const ALL_SELLER_SEQUENCES = ALL_PRICE_CHANGE_TUPLES.map(sellerPricesWithChange => {
+//     const listSequences = [];
+//     for (let i = 4; i < sellerPricesWithChange.length; i++) {
+//         const slidingWindow = sellerPricesWithChange.slice(i - 4, i);
+//         const changeSeq = slidingWindow.map(PrCh => PrCh[1]);
+//         listSequences.push(changeSeq.toString());
+//     }
+//     return listSequences;
+// });
+// console.log(ALL_SELLER_SEQUENCES[0]);
+
+const ALL_SELLER_PRICE_SEQUENCES = ALL_PRICE_CHANGE_TUPLES.map(sellerPricesWithChange => {
+    const prices = new Map();
+    for (let i = 4; i < sellerPricesWithChange.length; i++) {
+        const slidingWindow = sellerPricesWithChange.slice(i - 4, i);
+        const changeSeq = slidingWindow.map(PrCh => PrCh[1]);
+        if (!prices.has(changeSeq.toString())) prices.set(changeSeq.toString(), slidingWindow[3][0]);
+    }
+    // console.log(sequences.has('-2,1,-1,3'));
+    return prices;
+});
+
+console.log(ALL_SELLER_PRICE_SEQUENCES[0]);
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+const ALL_SELLER_UNIQ_SEQUENCES = ALL_PRICE_CHANGE_TUPLES.map(sellerPricesWithChange => {
+    const sequences = new Set();
+    for (let i = 4; i < sellerPricesWithChange.length; i++) {
+        const slidingWindow = sellerPricesWithChange.slice(i - 4, i);
+        const changeSeq = slidingWindow.map(PrCh => PrCh[1]);
+        sequences.add(changeSeq.toString());
+    }
+    // console.log(sequences.has('-2,1,-1,3'));
+    return sequences;
+});
+console.log(ALL_SELLER_UNIQ_SEQUENCES[0]);
+
+let SequencesIntersetion = ALL_SELLER_UNIQ_SEQUENCES[0];
+console.log(SequencesIntersetion.intersection( new Set(['-2,1,-1,3']) ));
+
+// console.log(  SequencesIntersetion.intersection(ALL_SELLER_UNIQ_SEQUENCES[1])  ); // ✓
+for (let i = 1; i < ALL_SELLER_UNIQ_SEQUENCES.length - 1; i++) {
+    SequencesIntersetion = SequencesIntersetion.intersection(ALL_SELLER_UNIQ_SEQUENCES[i]);
+}
+
+console.log(SequencesIntersetion);
+*/
+
+
+
+
+
+
+
+process.exit();
+
 // Just checking absolute maximum is not the right answer
 // We need to find some kind of weighted-average local maximum instead
-const listHighestPrices = ALL_PRICE_CHANGE_TUPLES.map(sellerPricecWithChange => {
+/*
+const listHighestPrices = ALL_PRICE_CHANGE_TUPLES.map(sellerPricesWithChange => {
     let sellerHighestPrice = 0;
     let highestPriceSequence = [];
-    for (let i = 4; i < sellerPricecWithChange.length; i++) {
-        const slidingWindow = sellerPricecWithChange.slice(i - 4, i);
+    for (let i = 4; i < sellerPricesWithChange.length; i++) {
+        const slidingWindow = sellerPricesWithChange.slice(i - 4, i);
         const changeSeq = slidingWindow.map(PrCh => PrCh[1]);
 
         if (slidingWindow[3][0] > sellerHighestPrice) {
@@ -115,6 +185,7 @@ const listHighestPrices = ALL_PRICE_CHANGE_TUPLES.map(sellerPricecWithChange => 
     return {price: sellerHighestPrice, seq: highestPriceSequence};
 });
 console.log(listHighestPrices);
+*/
 
 // console.log(ALL_PRICE_CHANGE_TUPLES);
 
