@@ -80,32 +80,41 @@ console.log(highestPrice, bestSequence);
 */
 
 
-const sequence = [-2, 1, -1, 3];
-let priceForSequence = SEED_NUMBERS.map(n => {
-    const LIFO = [];
-    for (let i = 0; i < 2000; i++) {
-        const current = next(n);
-        const price = current % 10;
+return SEED_NUMBERS.map(n => {
 
-        const change = price - (n % 10);
-        LIFO.push(change);
-        if (LIFO.length > 4) LIFO.shift();
+    
+});
 
-        if (LIFO.toString() === sequence.toString()) {
-            return price;
+
+
+function totalBananasForSequence(sequence) {
+    return SEED_NUMBERS.map(n => {
+        const LIFO = [];
+        for (let i = 0; i < 2000; i++) {
+            const current = next(n);
+            const price = current % 10;
+    
+            const change = price - (n % 10);
+            LIFO.push(change);
+            if (LIFO.length > 4) LIFO.shift();
+    
+            if (LIFO.toString() === sequence.toString()) {
+                return price;
+            }
+    
+            n = current;
         }
 
-        n = current;
-    }
+        return 0;
+    }).reduce( (acc, v) => acc + v, 0 );
+}
 
-    return null;
-});
-console.log(priceForSequence);
+console.log( totalBananasForSequence([-2, 1, -1, 3]) );
 
 
 
 /*
-BUGGY code:
+// ?BUGGY? code:
 let bestPriceSequences = SEED_NUMBERS.map(n => {
     let highestPrice = 0;
     let bestSequence = [];
