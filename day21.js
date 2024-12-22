@@ -48,6 +48,25 @@ v<<A    >>^A    vA  ^A  v<<A    >>^A    A   v<<A    >A  >^A A   vA  A   <^A >A  
 
 
 /*
+
+379A:
+^A^^<<A>>AvvvA
+<A>A<AAv<AA>>^AvAA^A<vAAA>^A
+v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^AA<A>Av<<A>A>^AAAvA<^A>A
+
+
+029A:
+<A^A>^^AvvvA
+v<<A>>^A<A>AvA<^AA>A<vAAA>^A
+<vA<AA>>^AvAA<^A>A v<<A >>^AvA^A<vA>^A v<<A >^A>AAvA^A v<<A >A>^AAAvA<^A>A
+
+Expected:
+<vA<AA>>^AvAA<^A>A <v<A >>^AvA^A<vA>^A <v<A >^A>AAvA^A <v<A >A>^AAAvA<^A>A
+v<<A>>^A<A>AvA<^AA>A<vAAA>^A
+<A^A>^^AvvvA
+
+
+
 029A:
 ✓ <A^A>^^AvvvA
 
@@ -134,6 +153,7 @@ function getNumpadButtons(sequence) {
 
 
 function sequenceNumpad(code) {
+    const [nullX, nullY] = NUMPAD_MAP.get(null);
     let pos = NUMPAD_MAP.get('A');
     let commands = [];
     code.split('').forEach(targetKey => {
@@ -154,12 +174,22 @@ function sequenceNumpad(code) {
         } else {
             if (dx > 0 && dy > 0) {
                 // fixme: add TRICKY branch
-                commands += '>'.repeat(dx);     // important to first move horizontally
-                commands += '^'.repeat(dy);
+                if (x === nullX || y === nullY) {
+                    commands += '>'.repeat(dx);     // important to first move horizontally
+                    commands += '^'.repeat(dy);
+                } else {
+                    commands += '^'.repeat(dy);
+                    commands += '>'.repeat(dx);
+                }
             } else if (dx < 0 && dy < 0) {
                 // fixme: add TRICKY branch
-                commands += '^'.repeat(-dy);    // important to first move vertically
-                commands += '<'.repeat(-dx);
+                if (x === nullX || y === nullY) {
+                    commands += '^'.repeat(-dy);    // important to first move vertically
+                    commands += '<'.repeat(-dx);
+                } else {
+                    commands += '<'.repeat(-dx);
+                    commands += '^'.repeat(-dy);
+                }
             } else if (dx < 0 && dy > 0) {
                 // fixme: add branch
                 commands += '<'.repeat(-dx);
@@ -179,6 +209,7 @@ function sequenceNumpad(code) {
 }
 
 function sequenceArrowpad(code) {
+    const [nullX, nullY] = ARROWPAD_MAP.get(null);
     let pos = ARROWPAD_MAP.get('A');
     let commands = '';
     code.split('').forEach(targetKey => {
@@ -204,11 +235,21 @@ function sequenceArrowpad(code) {
                 commands += '<'.repeat(-dx);
                 commands += '^'.repeat(-dy);
             } else if (dx < 0 && dy > 0) {
-                commands += 'v'.repeat(dy);     // important to first move vertically
-                commands += '<'.repeat(-dx);
+                if (x === nullX || y === nullY) {
+                    commands += 'v'.repeat(dy);     // important to first move vertically
+                    commands += '<'.repeat(-dx);
+                } else {
+                    commands += '<'.repeat(-dx);
+                    commands += 'v'.repeat(dy);
+                }
             } else if (dx > 0 && dy < 0) {
-                commands += '>'.repeat(dx);     // important to first move horizontally
-                commands += '^'.repeat(-dy);
+                if (x === nullX || y === nullY) {
+                    commands += '>'.repeat(dx);     // important to first move horizontally
+                    commands += '^'.repeat(-dy);
+                } else {
+                    commands += '^'.repeat(-dy);
+                    commands += '>'.repeat(dx);
+                }
             }
         }
 
@@ -240,7 +281,7 @@ DOOR_CODES.forEach(code => {
 // 379A: <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
 //   MY: v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA^<A>Av<A>^AA<A>Av<A<A>>^AAAvA^<A>A
 
-const code = '379A';
+const code = '029A';
 
 const codeNumeric = Number( code.replace('A', '') );
 
@@ -254,11 +295,10 @@ const seqMy = sequenceArrowpad(seqA);
 console.log( seqMy, seqMy.length );
 
 const complexity = seqMy.length * codeNumeric;
-console.log( seqMy.length, codeNumeric, complexity );
+console.log( `${code}: ${seqMy.length} × ${codeNumeric} = ${complexity}\n` );
 // console.log( complexity );
 
-
-
+console.log('Verify:');
 const arrows1 = getArrowButtons('<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A');
 console.log( arrows1 );
 

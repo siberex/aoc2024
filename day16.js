@@ -6,7 +6,7 @@ import {printMap} from './_utils.js';
 import fs from 'node:fs/promises';
 import process from 'node:process';
 
-const INPUT = await fs.readFile('./input/16.txt', { encoding: 'utf8' });
+const INPUT = await fs.readFile('./input/16_alt.txt', { encoding: 'utf8' });
 
 // 16_alt.txt wrong answer (105512). correct is 105508
 // https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm 
@@ -73,6 +73,8 @@ const onStep = (currentNode, neighbor) => {
     if (currentNode.x > neighbor.x) neighbor.direction = '>';
     if (currentNode.y < neighbor.y) neighbor.direction = '^';
     if (currentNode.y > neighbor.y) neighbor.direction = 'v';
+
+    neighbor.cost = 0;
 }
 
 const astar = new AStar(mapConverted, heuristic, gScore, onStep);
