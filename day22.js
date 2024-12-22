@@ -80,31 +80,35 @@ console.log(highestPrice, bestSequence);
 */
 
 
-return SEED_NUMBERS.map(n => {
+const ALL_PRICE_CHANGE_TUPLES = SEED_NUMBERS.map(n => {
+    let res = [];
 
-    
+    for (let i = 0; i < 2000; i++) {
+        const current = next(n);
+        const price = current % 10;
+
+        const change = price - (n % 10);
+        
+        res.push([price, change]);
+
+        n = current;
+    }
+
+    return res;
 });
 
+// console.log(ALL_PRICE_CHANGE_TUPLES);
 
 
 function totalBananasForSequence(sequence) {
-    return SEED_NUMBERS.map(n => {
-        const LIFO = [];
-        for (let i = 0; i < 2000; i++) {
-            const current = next(n);
-            const price = current % 10;
-    
-            const change = price - (n % 10);
-            LIFO.push(change);
-            if (LIFO.length > 4) LIFO.shift();
-    
-            if (LIFO.toString() === sequence.toString()) {
-                return price;
+    return ALL_PRICE_CHANGE_TUPLES.map(tuples => {
+        for (let i = 4; i < tuples.length; i++) {
+            const slidingWindow = tuples.slice(i - 4, i);
+            const changeSeq = slidingWindow.map(PrCh => PrCh[1]);
+            if (changeSeq.toString() === sequence.toString()) {
+                return slidingWindow[3][0]; // price at the endo of the sequence
             }
-    
-            n = current;
         }
-
         return 0;
     }).reduce( (acc, v) => acc + v, 0 );
 }
