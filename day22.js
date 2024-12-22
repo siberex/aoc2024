@@ -6,12 +6,12 @@ import {manhattan} from './_astar.js';
 import {printMap} from './_utils.js';
 
 const DEBUG = true;
-const input_filename = DEBUG ? './input/22.test' : './input/22.txt';
+const input_filename = DEBUG ? './input/22.test2' : './input/22.txt';
 const INPUT = await fs.readFile(input_filename, { encoding: 'utf8' });
 
 const SEED_NUMBERS = INPUT.split('\n').filter(v => v).map(Number);
 
-console.log(SEED_NUMBERS);
+// console.log(SEED_NUMBERS);
 
 
 function next(n) {
@@ -46,13 +46,94 @@ let res = SEED_NUMBERS.map(n => {
     }
     return n;
 });
+// Part 1 result:
+// console.log( res.reduce((acc, v) => acc + v, 0) );
 
-console.log( res.reduce((acc, v) => acc + v, 0) );
 
 
 
+// Part 2
+
+/*
 let testN = 123;
+let highestPrice = 0;
+let bestSequence = [];
+const LIFO = [];
 for (let i = 0; i < 10; i++) {
-    testN = next(testN);
-    console.log(testN);
+    const current = next(testN);
+    const price = current % 10;
+
+    const change = price - (testN % 10);
+    LIFO.push(change);
+    if (LIFO.length > 4) LIFO.shift();
+
+    if (highestPrice < price && LIFO.length === 4) {
+        // console.log('High', price, LIFO);
+        bestSequence = structuredClone(LIFO);
+        highestPrice = price;
+    }
+
+    testN = current;
+    console.log(price, change);
 }
+console.log(highestPrice, bestSequence);
+*/
+
+
+const sequence = [-2, 1, -1, 3];
+let priceForSequence = SEED_NUMBERS.map(n => {
+    const LIFO = [];
+    for (let i = 0; i < 2000; i++) {
+        const current = next(n);
+        const price = current % 10;
+
+        const change = price - (n % 10);
+        LIFO.push(change);
+        if (LIFO.length > 4) LIFO.shift();
+
+        if (LIFO.toString() === sequence.toString()) {
+            return price;
+        }
+
+        n = current;
+    }
+
+    return null;
+});
+console.log(priceForSequence);
+
+
+
+/*
+BUGGY code:
+let bestPriceSequences = SEED_NUMBERS.map(n => {
+    let highestPrice = 0;
+    let bestSequence = [];
+
+    const LIFO = [];
+    for (let i = 0; i < 2000; i++) {
+        const current = next(n);
+        const price = current % 10;
+
+        const change = price - (n % 10);
+        LIFO.push(change);
+        if (LIFO.length > 4) LIFO.shift();
+
+        if (highestPrice < price && LIFO.length === 4) {
+            // console.log('High', price, LIFO);
+            bestSequence = structuredClone(LIFO);
+            highestPrice = price;
+        }
+
+        n = current;
+    }
+
+    console.log(highestPrice, bestSequence);
+    return {
+        price: highestPrice,
+        seq: bestSequence,
+    };
+});
+*/
+
+
