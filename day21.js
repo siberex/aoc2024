@@ -135,8 +135,9 @@ function getNumpadButtons(sequence) {
 
 function sequenceNumpad(code) {
     let pos = NUMPAD_MAP.get('A');
-    let commands = '';
+    let commands = [];
     code.split('').forEach(targetKey => {
+        const cmd = [];
         const [x0, y0] = pos;
         const [x, y] = NUMPAD_MAP.get(targetKey);    
         const dx = x - x0, 
@@ -152,15 +153,19 @@ function sequenceNumpad(code) {
             if (dx < 0) commands += '<'.repeat(-dx);
         } else {
             if (dx > 0 && dy > 0) {
+                // fixme: add TRICKY branch
                 commands += '>'.repeat(dx);     // important to first move horizontally
                 commands += '^'.repeat(dy);
             } else if (dx < 0 && dy < 0) {
+                // fixme: add TRICKY branch
                 commands += '^'.repeat(-dy);    // important to first move vertically
                 commands += '<'.repeat(-dx);
             } else if (dx < 0 && dy > 0) {
+                // fixme: add branch
                 commands += '<'.repeat(-dx);
                 commands += 'v'.repeat(dy);
             } else if (dx > 0 && dy < 0) {
+                // fixme: add branch
                 commands += '>'.repeat(dx);
                 commands += '^'.repeat(-dy);
             }
