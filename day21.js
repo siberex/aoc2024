@@ -13,6 +13,9 @@ const DOOR_CODES = INPUT.split('\n').filter(v => v);
 
 console.log(DOOR_CODES);
 
+// ^A<<^^A>>AvvvA
+//  3
+
 /*
 +---+---+---+
 | 7 | 8 | 9 |
@@ -151,13 +154,54 @@ function getNumpadButtons(sequence) {
 }
 
 
+function cmdVariationsAppend(variations, cmd) {
+    return variations.map(variant => variant + cmd);
+}
 
-function sequenceNumpad(code) {
+class Variations {
+    constructor() {
+        this.variations = [];
+    }
+
+    add(items) {
+        if (Array.isArray(items)) {
+            // Array: number of variations should be multiplied by items.length
+            if (this.variations.length === 0) {
+                this.variations = items;
+            } else {
+                this.variations = items.flatMap(
+                    item => this.variations.map(variation => variation + item)
+                );
+            }
+        } else {
+            // String, simply append it to all variations
+            if (this.variations.length === 0) {
+                // First item, create first variation;
+                this.variations = [items];
+            } else {
+                this.variations = this.variations.map(variation => variation + items);
+            }
+        }
+    }
+}
+
+/*
+const v = new Variations();
+v.add('123_');
+v.add(['branchA', 'branchB']);
+v.add('_456_');
+v.add(['branchC', 'branchD']);
+v.add('_789');
+console.log(v.variations);
+process.exit();
+*/
+
+
+function sequenceNumpadVariations(code) {
     const [nullX, nullY] = NUMPAD_MAP.get(null);
+    const commands = new Variations();
     let pos = NUMPAD_MAP.get('A');
-    let commands = [];
     code.split('').forEach(targetKey => {
-        const cmd = [];
         const [x0, y0] = pos;
         const [x, y] = NUMPAD_MAP.get(targetKey);    
         const dx = x - x0, 
@@ -166,52 +210,58 @@ function sequenceNumpad(code) {
         if (dx === 0 && dy === 0) {
             // NOOP
         } else if (dx === 0) {
-            if (dy > 0) commands += 'v'.repeat(dy);
-            if (dy < 0) commands += '^'.repeat(-dy);
+            if (dy > 0) commands.add('v'.repeat(dy));
+            if (dy < 0) commands.add('^'.repeat(-dy));
         } else if (dy === 0) {
-            if (dx > 0) commands += '>'.repeat(dx);
-            if (dx < 0) commands += '<'.repeat(-dx);
+            if (dx > 0) commands.add('>'.repeat(dx));
+            if (dx < 0) commands.add('<'.repeat(-dx));
         } else {
             if (dx > 0 && dy > 0) {
-                // fixme: add TRICKY branch
                 if (x === nullX || y === nullY) {
-                    commands += '>'.repeat(dx);     // important to first move horizontally
-                    commands += '^'.repeat(dy);
+                    // important to first move horizontally
+                    commands.add('>'.repeat(dx) + '^'.repeat(dy));
                 } else {
-                    commands += '^'.repeat(dy);
-                    commands += '>'.repeat(dx);
+                    commands.add([
+                        '>'.repeat(dx) + '^'.repeat(dy),
+                        '^'.repeat(dy) + '>'.repeat(dx),
+                    ]);
                 }
             } else if (dx < 0 && dy < 0) {
                 // fixme: add TRICKY branch
-                // if (x === nullX || y === nullY) {
-                //     commands += '^'.repeat(-dy);    // important to first move vertically
-                //     commands += '<'.repeat(-dx);
-                // } else {
-                    commands += '<'.repeat(-dx);
-                    commands += '^'.repeat(-dy);
-                // }
+                if (x === nullX || y === nullY) {
+                    // important to first move vertically
+                    commands.add('^'.repeat(-dy) + '<'.repeat(-dx));
+                } else {
+                    commands.add([
+                        '^'.repeat(-dy) + '<'.repeat(-dx),
+                        '<'.repeat(-dx) + '^'.repeat(-dy), // ???
+                    ]);
+                }
             } else if (dx < 0 && dy > 0) {
-                // fixme: add branch
-                commands += '<'.repeat(-dx);
-                commands += 'v'.repeat(dy);
+                commands.add([
+                    '<'.repeat(-dx) + 'v'.repeat(dy),
+                    'v'.repeat(dy) + '<'.repeat(-dx),
+                ]);
             } else if (dx > 0 && dy < 0) {
-                // fixme: add branch
-                commands += '>'.repeat(dx);
-                commands += '^'.repeat(-dy);
+                commands.add([
+                    '>'.repeat(dx) + '^'.repeat(-dy),
+                    '^'.repeat(-dy) + '>'.repeat(dx),
+                ]);
             }
         }
 
-        commands += 'A';
+        commands.add('A');
         pos = [x, y];
         // console.log(commands); // debug
     });
-    return commands;
+    
+    return commands.variations;
 }
 
-function sequenceArrowpad(code) {
+function sequenceArrowpadVariations(code) {
     const [nullX, nullY] = ARROWPAD_MAP.get(null);
+    const commands = new Variations();
     let pos = ARROWPAD_MAP.get('A');
-    let commands = '';
     code.split('').forEach(targetKey => {
         const [x0, y0] = pos;
         const [x, y] = ARROWPAD_MAP.get(targetKey);    
@@ -219,60 +269,67 @@ function sequenceArrowpad(code) {
               dy = y - y0;
 
         if (dx === 0 && dy === 0) {
-            // console.log('YARR');
             // NOOP
         } else if (dy === 0) {
-            if (dx > 0) commands += '>'.repeat(dx);
-            if (dx < 0) commands += '<'.repeat(-dx);
+            if (dx > 0) commands.add('>'.repeat(dx));
+            if (dx < 0) commands.add('<'.repeat(-dx));
         } else if (dx === 0) {
-            if (dy > 0) commands += 'v'.repeat(dy);
-            if (dy < 0) commands += '^'.repeat(-dy);
+            if (dy > 0) commands.add('v'.repeat(dy));
+            if (dy < 0) commands.add('^'.repeat(-dy));
         } else {
             if (dx > 0 && dy > 0) {
-                commands += '>'.repeat(dx);
-                commands += '^'.repeat(dy);
+                commands.add([
+                    '>'.repeat(dx) + '^'.repeat(dy),
+                    '^'.repeat(dy) + '>'.repeat(dx),
+                ]);
             } else if (dx < 0 && dy < 0) {
-                commands += '<'.repeat(-dx);
-                commands += '^'.repeat(-dy);
+                commands.add([
+                    '<'.repeat(-dx) + '^'.repeat(-dy),
+                    '^'.repeat(-dy) + '<'.repeat(-dx),
+                ]);
             } else if (dx < 0 && dy > 0) {
                 if (x === nullX || y === nullY) {
-                    commands += 'v'.repeat(dy);     // important to first move vertically
-                    commands += '<'.repeat(-dx);
+                    // important to first move vertically
+                    commands.add('v'.repeat(dy) + '<'.repeat(-dx));
                 } else {
-                    commands += '<'.repeat(-dx);
-                    commands += 'v'.repeat(dy);
+                    commands.add([
+                        'v'.repeat(dy) + '<'.repeat(-dx),
+                        '<'.repeat(-dx) + 'v'.repeat(dy),
+                    ]);
                 }
             } else if (dx > 0 && dy < 0) {
                 if (x === nullX || y === nullY) {
-                    commands += '>'.repeat(dx);     // important to first move horizontally
-                    commands += '^'.repeat(-dy);
+                    // important to first move horizontally
+                    commands.add('>'.repeat(dx) + '^'.repeat(-dy));
                 } else {
-                    commands += '^'.repeat(-dy);
-                    commands += '>'.repeat(dx);
+                    commands.add([
+                        '>'.repeat(dx) + '^'.repeat(-dy),
+                        '^'.repeat(-dy) + '>'.repeat(dx),
+                    ]);
                 }
             }
         }
 
-        commands += 'A';
+        commands.add('A');
         pos = [x, y];
         // console.log(commands); // debug
     });
-    return commands;
+    return commands.variations;
 }
 
 
-
+/*
 let total = 0;
 DOOR_CODES.forEach(code => {
     const codeNumeric = Number( code.replace('A', '') );
 
-    const seqN = sequenceNumpad(code);
+    const seqN = sequenceNumpadVariations(code)[0];
     // console.log( seqN );
     
-    const seqA = sequenceArrowpad(seqN);
+    const seqA = sequenceArrowpadVariations(seqN)[0];
     // console.log( seqA );
     
-    const seqMy = sequenceArrowpad(seqA);
+    const seqMy = sequenceArrowpadVariations(seqA)[0];
     // console.log( seqMy, seqMy.length );
     
     const complexity = seqMy.length * codeNumeric;
@@ -292,7 +349,7 @@ DOOR_CODES.forEach(code => {
 });
 console.log(total);
 // 288800 — answer is too high
-
+*/
 
 // '379A' last sequence length is wrong!
 // expected 64, NOT 68
@@ -304,39 +361,40 @@ console.log(total);
 
 My:
 379A:
-^A^^<<A>>AvvvA
-<A>A <AAv<AA>>^A vAA^A<vAAA>^A
-v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^AA<A>Av<<A>A>^AAAvA<^A>A 68
+^A ^^<<A >>A vvvA
+<A>A <A Av<AA>>^AvAA^A<vAAA>^A
+v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^AA<A>Av<<A>A>^AAAvA<^A>A
+
 
 Expected:
 <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
 <A>A v<<AA>^AA>A vAA^A<vAAA>^A
-^A<<^^A>>AvvvA
+^A <<^^A >>A vvvA
 379A
 
 
 */
 
-process.exit();
+// process.exit();
 
 const code = '379A';
 
 const codeNumeric = Number( code.replace('A', '') );
 
-const seqN = sequenceNumpad(code);
+const seqN = sequenceNumpadVariations(code);
 console.log( seqN );
 
-const seqA = sequenceArrowpad(seqN);
+const seqA = sequenceArrowpadVariations(seqN[0]);
 console.log( seqA );
 
-const seqMy = sequenceArrowpad(seqA);
-console.log( seqMy, seqMy.length );
+const seqMy = sequenceArrowpadVariations(seqA[0]);
+console.log( seqMy );
 
-const complexity = seqMy.length * codeNumeric;
-console.log( `${code}: ${seqMy.length} × ${codeNumeric} = ${complexity}\n` );
+const complexity = seqMy[0].length * codeNumeric;
+console.log( `${code}: ${seqMy[0].length} × ${codeNumeric} = ${complexity}\n` );
 // console.log( complexity );
 
-console.log('Verify:');
+console.log('Should be like this:');
 const arrows1 = getArrowButtons('<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A');
 console.log( arrows1 );
 
@@ -346,3 +404,67 @@ console.log( arrows2 );
 const numpad = getNumpadButtons(arrows2);
 console.log( numpad );
 
+/*
+
+LOOKING FOR:
+<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
+<A>Av<<AA>^AA>AvAA^A<vAAA>^A
+^A<<^^A>>AvvvA
+379A
+
+ALL VARIATIONS FOR 379A:
+
+[ '^A^^<<A>>AvvvA' ]
+[ '<A>A<AAv<AA>>^AvAA^Av<AAA>^A', '<A>A<AAv<AA>>^AvAA^A<vAAA>^A' ]
+
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA<^A>Av<A>^AA<A>Av<A<A>>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA<^A>Av<A>^AA<A>Av<A<A>>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA^<A>Av<A>^AA<A>Av<A<A>>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA^<A>Av<A>^AA<A>Av<A<A>>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA<^A>A<vA>^AA<A>Av<A<A>>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^AA<A>Av<A<A>>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA^<A>A<vA>^AA<A>Av<A<A>>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA^<A>A<vA>^AA<A>Av<A<A>>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA<^A>Av<A>^AA<A>A<vA<A>>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA<^A>Av<A>^AA<A>A<vA<A>>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA^<A>Av<A>^AA<A>A<vA<A>>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA^<A>Av<A>^AA<A>A<vA<A>>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA<^A>A<vA>^AA<A>A<vA<A>>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^AA<A>A<vA<A>>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA^<A>A<vA>^AA<A>A<vA<A>>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA^<A>A<vA>^AA<A>A<vA<A>>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA<^A>Av<A>^AA<A>Av<A<A>>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA<^A>Av<A>^AA<A>Av<A<A>>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA^<A>Av<A>^AA<A>Av<A<A>>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA^<A>Av<A>^AA<A>Av<A<A>>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA<^A>A<vA>^AA<A>Av<A<A>>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^AA<A>Av<A<A>>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA^<A>A<vA>^AA<A>Av<A<A>>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA^<A>A<vA>^AA<A>Av<A<A>>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA<^A>Av<A>^AA<A>A<vA<A>>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA<^A>Av<A>^AA<A>A<vA<A>>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA^<A>Av<A>^AA<A>A<vA<A>>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA^<A>Av<A>^AA<A>A<vA<A>>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA<^A>A<vA>^AA<A>A<vA<A>>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^AA<A>A<vA<A>>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA^<A>A<vA>^AA<A>A<vA<A>>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA^<A>A<vA>^AA<A>A<vA<A>>^AAAvA^<A>A'
+
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA<^A>Av<A>^AA<A>Av<<A>A>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA<^A>Av<A>^AA<A>Av<<A>A>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA^<A>Av<A>^AA<A>Av<<A>A>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA^<A>Av<A>^AA<A>Av<<A>A>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA<^A>A<vA>^AA<A>Av<<A>A>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^AA<A>Av<<A>A>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA^<A>A<vA>^AA<A>Av<<A>A>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA^<A>A<vA>^AA<A>Av<<A>A>^AAAvA<^A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA<^A>Av<A>^AA<A>Av<<A>A>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA<^A>Av<A>^AA<A>Av<<A>A>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA^<A>Av<A>^AA<A>Av<<A>A>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA^<A>Av<A>^AA<A>Av<<A>A>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA<^A>A<vA>^AA<A>Av<<A>A>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^AA<A>Av<<A>A>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA^<A>A<vA>^AA<A>Av<<A>A>^AAAvA^<A>A',
+  'v<<A>>^AvA^Av<<A>>^AA<vA<A>>^AAvAA^<A>A<vA>^AA<A>Av<<A>A>^AAAvA^<A>A'
+
+*/
