@@ -97,24 +97,69 @@ const ALL_PRICE_CHANGE_TUPLES = SEED_NUMBERS.map(n => {
     return res;
 });
 
+// Just checking absolute maximum is not the right answer
+// We need to find some kind of weighted-average local maximum instead
+const listHighestPrices = ALL_PRICE_CHANGE_TUPLES.map(sellerPricecWithChange => {
+    let sellerHighestPrice = 0;
+    let highestPriceSequence = [];
+    for (let i = 4; i < sellerPricecWithChange.length; i++) {
+        const slidingWindow = sellerPricecWithChange.slice(i - 4, i);
+        const changeSeq = slidingWindow.map(PrCh => PrCh[1]);
+
+        if (slidingWindow[3][0] > sellerHighestPrice) {
+            sellerHighestPrice = slidingWindow[3][0];
+            highestPriceSequence = changeSeq;
+        }        
+    }
+
+    return {price: sellerHighestPrice, seq: highestPriceSequence};
+});
+console.log(listHighestPrices);
+
 // console.log(ALL_PRICE_CHANGE_TUPLES);
 
 
+const MEMO = new Map();
+
 function totalBananasForSequence(sequence) {
-    return ALL_PRICE_CHANGE_TUPLES.map(tuples => {
+    const sequenceStr = sequence.toString();
+
+    if (MEMO.has(sequenceStr)) return MEMO.get(sequenceStr);
+
+    const total = ALL_PRICE_CHANGE_TUPLES.map(tuples => {
         for (let i = 4; i < tuples.length; i++) {
             const slidingWindow = tuples.slice(i - 4, i);
             const changeSeq = slidingWindow.map(PrCh => PrCh[1]);
-            if (changeSeq.toString() === sequence.toString()) {
-                return slidingWindow[3][0]; // price at the endo of the sequence
+            if (changeSeq.toString() === sequenceStr) {
+                return slidingWindow[3][0]; // price at the end of the sequence
             }
         }
         return 0;
     }).reduce( (acc, v) => acc + v, 0 );
+
+    MEMO.set(sequenceStr, total);
+
+    return total;
 }
 
 console.log( totalBananasForSequence([-2, 1, -1, 3]) );
 
+
+
+let totals = ALL_PRICE_CHANGE_TUPLES.map((tuples, i) => {
+    console.log(i);
+    let maxBananas = 0;
+    // Sliding window
+    for (let i = 4; i < tuples.length; i++) {
+        const sequence = tuples.slice(i - 4, i).map(PriceChange => PriceChange[1]);
+        const seqTotal = totalBananasForSequence(sequence);
+        if (seqTotal > maxBananas) maxBananas = seqTotal;
+    }
+    // console.log(maxBananas, 'max');
+    return maxBananas;
+});
+
+console.log( totals.reduce((acc, v) => acc > v ? acc : v, 0) );
 
 
 /*
