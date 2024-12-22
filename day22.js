@@ -5,7 +5,7 @@ import fs from 'node:fs/promises';
 import {manhattan} from './_astar.js';
 import {printMap} from './_utils.js';
 
-const DEBUG = true;
+const DEBUG = false;
 const input_filename = DEBUG ? './input/22.test2' : './input/22.txt';
 const INPUT = await fs.readFile(input_filename, { encoding: 'utf8' });
 
@@ -110,25 +110,23 @@ const ALL_PRICE_CHANGE_TUPLES = SEED_NUMBERS.map(n => {
 // });
 // console.log(ALL_SELLER_SEQUENCES[0]);
 
+
 const ALL_SELLER_PRICE_SEQUENCES = ALL_PRICE_CHANGE_TUPLES.map(sellerPricesWithChange => {
     const prices = new Map();
     for (let i = 4; i < sellerPricesWithChange.length; i++) {
         const slidingWindow = sellerPricesWithChange.slice(i - 4, i);
         const changeSeq = slidingWindow.map(PrCh => PrCh[1]);
+        // const price = slidingWindow[3][0];
+        // Note: 0-price should NOT be excluded, cause monkey checks only for the first sequence match, not for non-zero price
         if (!prices.has(changeSeq.toString())) prices.set(changeSeq.toString(), slidingWindow[3][0]);
     }
     // console.log(sequences.has('-2,1,-1,3'));
     return prices;
 });
 
-console.log(ALL_SELLER_PRICE_SEQUENCES[0]);
 
-
-
-
-
-
-
+// console.log(ALL_SELLER_PRICE_SEQUENCES[0]);
+// ALL_SELLER_PRICE_SEQUENCES.forEach(seq => console.log(seq.size));
 
 
 
@@ -145,26 +143,27 @@ const ALL_SELLER_UNIQ_SEQUENCES = ALL_PRICE_CHANGE_TUPLES.map(sellerPricesWithCh
     // console.log(sequences.has('-2,1,-1,3'));
     return sequences;
 });
-console.log(ALL_SELLER_UNIQ_SEQUENCES[0]);
+// console.log(ALL_SELLER_UNIQ_SEQUENCES[0]);
+
 
 let SequencesIntersetion = ALL_SELLER_UNIQ_SEQUENCES[0];
-console.log(SequencesIntersetion.intersection( new Set(['-2,1,-1,3']) ));
+// console.log(SequencesIntersetion.intersection( new Set(['-2,1,-1,3']) ));
 
 // console.log(  SequencesIntersetion.intersection(ALL_SELLER_UNIQ_SEQUENCES[1])  ); // ✓
 for (let i = 1; i < ALL_SELLER_UNIQ_SEQUENCES.length - 1; i++) {
-    SequencesIntersetion = SequencesIntersetion.intersection(ALL_SELLER_UNIQ_SEQUENCES[i]);
+    const intersection = SequencesIntersetion.intersection(ALL_SELLER_UNIQ_SEQUENCES[i]);
+    console.log(`${i}:\t${intersection.size}`);
+
+    // SequencesIntersetion = SequencesIntersetion.intersection(ALL_SELLER_UNIQ_SEQUENCES[i]);
 }
 
-console.log(SequencesIntersetion);
+// console.log(SequencesIntersetion);
 */
 
 
 
 
 
-
-
-process.exit();
 
 // Just checking absolute maximum is not the right answer
 // We need to find some kind of weighted-average local maximum instead
@@ -197,6 +196,12 @@ function totalBananasForSequence(sequence) {
 
     if (MEMO.has(sequenceStr)) return MEMO.get(sequenceStr);
 
+    const total = ALL_SELLER_PRICE_SEQUENCES.map(
+        sequencePriceMap => sequencePriceMap.get(sequenceStr)
+    ).filter(v => v !== undefined).reduce( (acc, v) => acc + v, 0 );
+
+
+    /*
     const total = ALL_PRICE_CHANGE_TUPLES.map(tuples => {
         for (let i = 4; i < tuples.length; i++) {
             const slidingWindow = tuples.slice(i - 4, i);
@@ -207,30 +212,52 @@ function totalBananasForSequence(sequence) {
         }
         return 0;
     }).reduce( (acc, v) => acc + v, 0 );
+    */
 
     MEMO.set(sequenceStr, total);
 
     return total;
 }
 
-console.log( totalBananasForSequence([-2, 1, -1, 3]) );
+// console.log( totalBananasForSequence([-2, 1, -1, 3]) );
 
 
 
-let totals = ALL_PRICE_CHANGE_TUPLES.map((tuples, i) => {
+// process.exit();
+
+let totals = ALL_SELLER_PRICE_SEQUENCES.map((sequencePriceMap, i) => {
     console.log(i);
     let maxBananas = 0;
+    let maxSequence = '';
+
+    sequencePriceMap.forEach((price, sequence) => {
+        const seqTotal = totalBananasForSequence(sequence);
+        if (seqTotal > maxBananas) {
+            maxBananas = seqTotal;
+            maxSequence = sequence;
+        }
+    });
+
     // Sliding window
+    /*
     for (let i = 4; i < tuples.length; i++) {
         const sequence = tuples.slice(i - 4, i).map(PriceChange => PriceChange[1]);
         const seqTotal = totalBananasForSequence(sequence);
         if (seqTotal > maxBananas) maxBananas = seqTotal;
     }
+    */
+
     // console.log(maxBananas, 'max');
-    return maxBananas;
+    return {price: maxBananas, sequence: maxSequence};
 });
 
-console.log( totals.reduce((acc, v) => acc > v ? acc : v, 0) );
+console.log('Max', totals.reduce((acc, v) => acc > v.price ? acc : v.price, 0) );
+
+totals.forEach(t => console.log(`${t.price}, ${t.sequence}`));
+
+// 1712 — answer is too low
+
+
 
 
 /*
