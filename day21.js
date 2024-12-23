@@ -213,7 +213,7 @@ function sequenceNumpadVariations(code) {
             if (dx < 0) commands.add('<'.repeat(-dx));
         } else {
             if (dx > 0 && dy > 0) {
-                if (x0 === nullX) { // bug here ?
+                if (x0 === nullX && y === nullY) {
                     // important to first move horizontally
                     commands.add('>'.repeat(dx) + 'v'.repeat(dy));
                 } else {
@@ -223,7 +223,7 @@ function sequenceNumpadVariations(code) {
                     ]);
                 }
             } else if (dx < 0 && dy < 0) {
-                if (y0 === nullY) { // bug here ?
+                if (y0 === nullY && x == nullX) {
                     // important to first move vertically
                     commands.add('^'.repeat(-dy) + '<'.repeat(-dx));
                 } else {
@@ -283,7 +283,7 @@ function sequenceArrowpadVariations(code) {
                     '^'.repeat(-dy) + '<'.repeat(-dx),
                 ]);
             } else if (dx < 0 && dy > 0) {
-                if (x === nullX) {
+                if (x === nullX && y0 === nullY) {
                     // important to first move vertically
                     commands.add('v'.repeat(dy) + '<'.repeat(-dx));
                 } else {
@@ -293,7 +293,7 @@ function sequenceArrowpadVariations(code) {
                     ]);
                 }
             } else if (dx > 0 && dy < 0) {
-                if (x === nullX) {
+                if (x0 === nullX && y === nullY) {
                     // important to first move horizontally
                     commands.add('>'.repeat(dx) + '^'.repeat(-dy));
                 } else {
@@ -338,7 +338,7 @@ function sequenceArrowpad(code) {
                 commands += '<'.repeat(-dx);
                 commands += '^'.repeat(-dy);
             } else if (dx < 0 && dy > 0) {
-                if (x === nullX || y === nullY) {
+                if (x === nullX && y0 === nullY) {
                     commands += 'v'.repeat(dy);     // important to first move vertically
                     commands += '<'.repeat(-dx);
                 } else {
@@ -346,7 +346,7 @@ function sequenceArrowpad(code) {
                     commands += 'v'.repeat(dy);
                 }
             } else if (dx > 0 && dy < 0) {
-                if (x === nullX || y === nullY) {
+                if (x0 === nullX && y === nullY) {
                     commands += '>'.repeat(dx);     // important to first move horizontally
                     commands += '^'.repeat(-dy);
                 } else {
@@ -371,7 +371,19 @@ DOOR_CODES.forEach(code => {
     const numpadRobotVariations = sequenceNumpadVariations(code);
     
     const seqMy = numpadRobotVariations.map(numpadSequence => {
+        
+        
+        return sequenceArrowpadVariations(numpadSequence).map(
+            seqA => sequenceArrowpad(seqA)
+        ).reduce(
+            (seq, acc) => seq.length < acc.length ? seq : acc, 
+            {length: Infinity}
+        );
+        
+
+
         const seqA = sequenceArrowpad(numpadSequence);
+        
         const seqMy = sequenceArrowpad(seqA);
         return seqMy;
 
@@ -402,6 +414,7 @@ DOOR_CODES.forEach(code => {
 console.log(total);
 // 288800 — answer is too high
 // 281968 — answer is too high
+// ✓ 278748
 
 
 // '379A' last sequence length is wrong!
