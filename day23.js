@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 
 import WeightedGraph from './_dijkstra.js';
 
-const DEBUG = true;
+const DEBUG = false;
 const input_filename = DEBUG ? './input/23.test' : './input/23.txt';
 const INPUT = await fs.readFile(input_filename, { encoding: 'utf8' });
 
@@ -129,10 +129,14 @@ NODES.forEach((leafs1, root1) => {
 
 // console.log(triplets);
 
-const filtered = [...triplets.values()].filter(triplet => triplet.includes('t'));
-console.log(filtered);
+const re = /t.{1}/g;
+// re.test(triplet) → somehow filters too much, no diea
+
+const filtered = [...triplets.values()].filter(triplet => triplet.split('_').some(name => name.at(0) === 't'));
+console.log(filtered.sort());
 
 // 2456 — answer is too high
+// 1314 ✓
 
 console.log(filtered.length);
 
