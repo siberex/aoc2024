@@ -274,8 +274,8 @@ function sequenceArrowpadVariations(code) {
         } else {
             if (dx > 0 && dy > 0) {
                 commands.add([
-                    '>'.repeat(dx) + '^'.repeat(dy),
-                    '^'.repeat(dy) + '>'.repeat(dx),
+                    '>'.repeat(dx) + 'v'.repeat(dy),
+                    'v'.repeat(dy) + '>'.repeat(dx),
                 ]);
             } else if (dx < 0 && dy < 0) {
                 commands.add([
@@ -323,7 +323,6 @@ function sequenceArrowpad(code) {
               dy = y - y0;
 
         if (dx === 0 && dy === 0) {
-            // console.log('YARR');
             // NOOP
         } else if (dy === 0) {
             if (dx > 0) commands += '>'.repeat(dx);
@@ -334,7 +333,7 @@ function sequenceArrowpad(code) {
         } else {
             if (dx > 0 && dy > 0) {
                 commands += '>'.repeat(dx);
-                commands += '^'.repeat(dy);
+                commands += 'v'.repeat(dy);
             } else if (dx < 0 && dy < 0) {
                 commands += '<'.repeat(-dx);
                 commands += '^'.repeat(-dy);
