@@ -38,15 +38,34 @@ const locks_and_keys = RAW_LOCKS_AND_KEYS.map(lock_or_key => {
 
     return rotated;
 });
-
+// console.log(locks_and_keys);
 
 
 const locks = locks_and_keys.filter(lock_or_key => lock_or_key.isLock);
 const keys = locks_and_keys.filter(lock_or_key => !lock_or_key.isLock);
 
 
-console.log('Locks:')
-locks.forEach(lock => console.log( printArr(lock) + '\n' ));
+// console.log('Locks:')
+// locks.forEach(lock => console.log( printArr(lock) + '\n' ));
 
-console.log('Keys:')
-keys.forEach(keys => console.log( printArr(keys) + '\n' ));
+// console.log('Keys:')
+// keys.forEach(keys => console.log( printArr(keys) + '\n' ));
+
+
+const locks_numeric = locks.map(lock_or_key => {
+    const numeric = lock_or_key.map(pin => pin.join('').match(/#/g).length - 1);
+    numeric.reverse();
+    // numeric.isLock = lock_or_key.isLock;
+    return numeric;
+});
+
+const keys_numeric = keys.map(lock_or_key => {
+    const numeric = lock_or_key.map(pin => pin.join('').match(/#/g).length - 1);
+    numeric.reverse();
+    // numeric.isLock = lock_or_key.isLock;
+    return numeric;
+});
+
+console.log(locks_numeric);
+console.log(keys_numeric);
+
