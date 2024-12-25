@@ -2,7 +2,7 @@
 
 import fs from 'node:fs/promises';
 
-const DEBUG = true;
+const DEBUG = false;
 const input_filename = DEBUG ? './input/24.test4' : './input/24.txt';
 const INPUT = await fs.readFile(input_filename, { encoding: 'utf8' });
 
@@ -26,7 +26,7 @@ const GATES = RAW_GATES.map(row => {
     return [in1, op, in2, out];
 });
 
-console.log(WIRES);
+// console.log(WIRES);
 // console.log(GATES);
 
 let Xarr = [];
@@ -54,8 +54,8 @@ for (const k in WIRES) {
             break;
     }
 }
-console.log(X, Xarr);
-console.log(Y, Yarr);
+console.log(X, '_,' + Xarr.join(','));
+console.log(Y, '_,' + Yarr.join(','));
 
 
 function isOutputReady() {
@@ -103,4 +103,9 @@ for (const k in WIRES) {
     OUT[pos] = v;
 }
 
-console.log(DECIMAL, OUT);
+console.log(DECIMAL, OUT.join(','));
+
+const expected = X + Y;
+const expectedArr = expected.toString(2).split('').map(Number);
+
+console.log(expected, expectedArr.join(','));
