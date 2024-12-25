@@ -2,7 +2,7 @@
 
 import fs from 'node:fs/promises';
 
-const DEBUG = true;
+const DEBUG = false;
 const input_filename = DEBUG ? './input/25.test' : './input/25.txt';
 const INPUT = await fs.readFile(input_filename, { encoding: 'utf8' });
 
@@ -69,3 +69,26 @@ const keys_numeric = keys.map(lock_or_key => {
 console.log(locks_numeric);
 console.log(keys_numeric);
 
+let matches = 0;
+locks_numeric.forEach(lock => {
+    keys_numeric.forEach(key => {
+        let pins_matched = 0;
+        for (let i = 0; i < key.length; i++) {
+            const pin_height = lock[i];
+            const key_height = key[i];
+            if (pin_height + key_height <= 5) {
+                pins_matched++;
+            } else {
+                // return;
+            }
+        }
+        // console.log(pins_matched)
+        if (pins_matched === 5) {
+            matches++;
+        } else {
+            // return;
+        }
+    });
+});
+
+console.log(matches);
